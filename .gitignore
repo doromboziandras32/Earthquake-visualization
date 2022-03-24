@@ -2,4 +2,5 @@
 /venv
 /chunk5.hdf5
 /csvs/earthquake_metadata.csv
+/csvs/earthquake_metadata_cleaned.csv
 
