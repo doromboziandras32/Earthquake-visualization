@@ -4,3 +4,7 @@
 /csvs/earthquake_metadata.csv
 /csvs/earthquake_metadata_cleaned.csv
 
+csvs/station_definitions_from_metadata.csv
+newmarker.js
+shapeMarker.js
+assets/dashExtensions_default.js
