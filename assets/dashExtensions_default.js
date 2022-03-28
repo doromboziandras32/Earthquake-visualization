@@ -152,6 +152,195 @@ window.dashExtensions = Object.assign({}, window.dashExtensions, {
             return L.marker(latlng, {
                 icon: flag
             });
+        },
+        function14: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function15: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `https://github.com/doromboziandras32/Interdisciplinary/blob/master/icons/antenna_img.png`,
+                iconSize: [64, 48]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function16: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function17: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `https://flagcdn.com/64x48/hu.png`,
+                iconSize: [20, 20]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function18: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function19: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [20, 20]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function20: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function21: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [48, 48]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function22: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function23: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [48, 48]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function24: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function25: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [48, 48]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function26: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function27: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [48, 48]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function28: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function29: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [48, 48]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
+        },
+        function30: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function31: function(feature, latlng) {
+            const flag = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [24, 24]
+            });
+            return L.marker(latlng, {
+                icon: flag
+            });
         }
     }
 });
