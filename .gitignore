@@ -9,3 +9,5 @@ newmarker.js
 shapeMarker.js
 assets/dashExtensions_default.js
 csvs/earthquake_metadata copy.csv
+csvs_backup/earthquake_metadata.csv
+csvs_backup/earthquake_metadata copy.csv
