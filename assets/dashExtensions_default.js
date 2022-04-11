@@ -299,6 +299,36 @@ window.dashExtensions = Object.assign({}, window.dashExtensions, {
             return L.marker(latlng, {
                 icon: antenna
             });
+        },
+        function30: function(feature, latlng, context) {
+            const {
+                min,
+                max,
+                colorscale,
+                circleOptions,
+                colorProp
+            } = context.props.hideout;
+            const csc = chroma.scale(colorscale).domain([min, max]); // chroma lib to construct colorscale
+            circleOptions.fillColor = csc(feature.properties[colorProp]); // set color based on color prop.
+            return L.circleMarker(latlng, circleOptions); // sender a simple circle marker.
+        },
+        function31: function(feature, latlng) {
+            const antenna = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [24, 24]
+            });
+            return L.marker(latlng, {
+                icon: antenna
+            });
+        },
+        function32: function(feature, latlng) {
+            const antenna = L.icon({
+                iconUrl: `/static/antenna_img.png`,
+                iconSize: [40, 40]
+            });
+            return L.marker(latlng, {
+                icon: antenna
+            });
         }
     }
 });
