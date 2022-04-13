@@ -1,1 +1,2 @@
 csvs/earthquake_metadata.csv filter=lfs diff=lfs merge=lfs -text
+csvs/chunk2.csv filter=lfs diff=lfs merge=lfs -text
