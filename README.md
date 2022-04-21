@@ -26,8 +26,15 @@ The map visualization has been split up to two components, an **Overview** map (
 
 
 
-<h3> Filtering <h3>
+<h3> Filtering </h3>
 
-The events 
+The visualized events can be filtered based on several attributes in order to focus on specific events.
+
+![Filter events](/screenshots/filtering_edited.png "Filtering earthquake events")
+
+As the upon screenshot shows, the events can be filtered by the provider of the event (belongs to the station), marked with **1**, as well as the selection of date range of event recording (**2**), and the range of earthquake magnitude (**3**) and depth (**4**).
+
+<h3> Waveform visualization and sonification </h3>
+
 
 
