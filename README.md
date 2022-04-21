@@ -12,13 +12,18 @@
 6. After all cells are executed, open the following link: **[Dash App](http://127.0.0.1:8050/)**
 
 <h2>Components </h2>
+
 The goal of the Dashboard is to visualize and sonify earthquake events from the past:
-the events are based on the
-**[STanford EArthquake Dataset](https://github.com/smousavi05/STEAD#stanford-earthquake-dataset-steada-global-data-set-of-seismic-signals-for-ai)**, namely the metadata which consists the information of earthquakes events, such as their location in **longitude** and **latitude**, as well as the **depth** and **magnitude** of the recorded event and the **corresponding station information** which recorded the event itself.
+the events are based on the **[STanford EArthquake Dataset](https://github.com/smousavi05/STEAD#stanford-earthquake-dataset-steada-global-data-set-of-seismic-signals-for-ai)**, namely the metadata which consists the information of earthquakes events, such as their location in **longitude** and **latitude**, as well as the **depth** and **magnitude** of the recorded event and the **corresponding station information** which recorded the event itself.
 Based on the record(s) stored in the metadata file, the waveform can be queried from the corresponding provider, via the **[ObsPy](https://github.com/obspy/obspy)** framework.
 <h3> Visualization of events </h3>
-The earthquake events are shown in maps. The maps are provided via the **[Dash Leaflet](https://github.com/thedirtyfew/dash-leaflet)** framework, the points are plotted as geojson instances as colored circle-markers, which color-coding belongs to the magnitude value of the recorded events.
+
+The earthquake events are shown in maps. The maps are provided via the **[Dash Leaflet](https://github.com/thedirtyfew/dash-leaflet)** framework, the points are plotted as geojson instances as colored circle-markers, which color-coding belongs to the magnitude value of the recorded events. Additionally, the recording stations are also plotted with antenna symbol.
+
+![Earthquake map](/screenshots/map_detail_00_edited.png "Overview and detail maps").
+
 <h3> Filtering <h3>
+
 The events 
 
 
