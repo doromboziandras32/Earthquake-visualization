@@ -7,9 +7,15 @@
     ```
     pip install -r requirements.txt
     ```
-4. Open jupyter notebook **Plot_test_map_leaflet.ipynb**
-5. Click on **Run All Cells**
+4a. Open jupyter notebook **Plot_test_map_leaflet.ipynb**
+5a. Click on **Run All Cells**
+
+OR 
+4b. Run **app.py** via terminal with the corresponding environtment's python executable
+
+
 6. After all cells are executed, open the following link: **[Dash App](http://127.0.0.1:8050/)**
+
 
 
 TODO: insert screenshots of the whole dasahboard there
