@@ -22,6 +22,10 @@ The earthquake events are shown in maps. The maps are provided via the **[Dash L
 
 ![Earthquake map](/screenshots/map_detail_00_edited.png "Overview and detail maps").
 
+The map visualization has been split up to two components, an **Overview** map (marked with **1**) and a **Detail** map (marked with **2**): if a station has been selected on the **Overview** map, the earthquake events which belongs to the selected station will be focused on the **Detail** map. Furthermore, the colors of the events on the **Detail** map will be re-scaled in order to distinguish the difference within them. The color-bars are marked with **3** and **4** upon.
+
+
+
 <h3> Filtering <h3>
 
 The events 
