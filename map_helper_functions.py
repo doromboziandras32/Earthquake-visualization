@@ -5,6 +5,13 @@ import librosa
 import soundfile as sf
 import base64 
 from io import BytesIO
+import matplotlib.pyplot as plt
+import dash_leaflet.express as dlx  
+import obspy
+from obspy import UTCDateTime
+from geopy.geocoders import Nominatim
+
+geolocator = Nominatim(user_agent="geoapiExercises")
 #Extract the proper seismic instrument
 #index: 0: north-south, 1: east-west, 2:vertical
 def create_seismic_sound_to_dash_bytes(x):
@@ -23,3 +30,120 @@ def create_seismic_sound_to_dash_bytes(x):
     
 
     return "data:audio/wav;base64,{}".format(encoded)
+
+
+def fig_to_uri(in_fig, close_all=True, **save_args):
+    px = 1/plt.rcParams['figure.dpi']
+    fig = plt.figure(figsize=(600*px, 200*px))
+    
+    out_img = BytesIO()
+    if isinstance(in_fig,obspy.core.Trace):
+        #in_fig.plot(outfile =out_img, format='png', size = (600,200) )
+        in_fig.plot(fig = fig )
+        fig.savefig(out_img, format='png', **save_args)
+        if close_all:
+            fig.clf()            
+            plt.close('all')   
+    else:    
+        in_fig.savefig(out_img, format='png', **save_args)
+        if close_all:
+            in_fig.clf()
+            plt.close('all')        
+    
+    out_img.seek(0)  # rewind file
+    encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
+    #return encoded
+    return "data:image/png;base64,{}".format(encoded)
+
+
+
+def spectrogram_to_uri(input_data, close_all=True, **save_args):    
+    #todo: maybe we might be able to make a bytewriter approach, which is easier, and can be used for seismic plot and spectrograms at once
+    
+    #f, t, Sxx = signal.spectrogram(input_data.filter("highpass", freq=0.5).data, input_data.stats.sampling_rate)
+    px = 1/plt.rcParams['figure.dpi']
+    plt.figure(figsize=(600*px, 250*px))
+    f, t, Sxx,e = plt.specgram(x = input_data.filter("highpass", freq=0.5).data, Fs = input_data.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
+    
+    #plt.pcolormesh(t, f, np.log10(Sxx))
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    #plt.show()
+
+    # type: (plt.Figure) -> str
+    """
+    Save a figure as a URI
+    :param in_fig:
+    :return:
+    """
+    out_img = BytesIO()
+    plt.savefig(out_img, format='png', **save_args)
+    if close_all:
+        plt.clf()
+        plt.close('all')
+    out_img.seek(0)  # rewind file
+    encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
+    #return encoded
+    return "data:image/png;base64,{}".format(encoded)
+
+def extract_waveform(client, event_record):
+    wave = client.get_waveforms(network=event_record['network_code'],
+                            station=event_record['receiver_code'],
+                            starttime=UTCDateTime(event_record['time']),
+                                endtime=UTCDateTime(event_record['time']) + 60,
+                                location = "*",
+                                channel = "*")
+    
+    #temprorarily extract only one stream
+    return wave[0]
+
+def create_event_infos(df,x):
+    #'time','source_depth_km','source_magnitude','trace_name','source_latitude','source_longitude','trace_category'
+    #selected_record = df_test.loc[x['trace_name']]
+    selected_record = df.loc[x]
+    latitude = str(selected_record['source_latitude'])
+    longitude = str(selected_record['source_longitude'])
+    address_details = ['road','county','state', 'country']
+    try:
+        location = geolocator.reverse(latitude + "," + longitude, language='en').raw
+        location_string = str()
+        for a in address_details:
+            try:
+                location_string += location['address'][a]
+                location_string += ', '
+
+            except KeyError:
+                pass
+        
+        location_string = location_string[:-2]
+    except AttributeError:
+        location_string = "N/A"
+
+
+    #print(location)
+    info_dict = dict()
+    info_dict['trace_name'] = x
+    info_dict['location'] = location_string
+    info_dict['latitude'] = latitude
+    info_dict['longitude'] = longitude
+    info_dict['event_recorded_at'] = str(selected_record['time'])
+    info_dict['earthquake_depth'] = f'{selected_record["source_depth_km"]} km'
+    info_dict['earthquake_magnitude'] = f'{selected_record["source_magnitude"]} km'
+
+    return pd.DataFrame.from_dict(info_dict, orient='index').reset_index().to_dict('records')
+
+
+def stations_df_to_geojson(x):
+    #df_points = x[['trace_name','source_latitude','source_longitude']]    
+    df_points = x.groupby(['station_id','network_name','station_name','latitude','longitude','station_opened','station_closed'], dropna=False)['provider'].apply(list).reset_index()
+    df_points_records_renamed = df_points.rename(columns = {'latitude' :'lat','longitude' :'lon'}).to_dict('records')
+    return dlx.dicts_to_geojson(df_points_records_renamed)
+
+
+
+def dataframe_to_geojson(x):
+    df_points = x.reset_index()[['trace_name','source_latitude','source_longitude','source_magnitude']]
+    df_points_records_renamed = df_points.rename(columns = {'source_latitude' :'lat','source_longitude' :'lon'}).to_dict('records')
+    return dlx.dicts_to_geojson(df_points_records_renamed)
+
+    
