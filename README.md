@@ -42,7 +42,6 @@ The events selected on the map were shown in waveform and spectrogram representa
 ![Show and sonify waveforms](/screenshots/audio_spectrogram_info_edited.png "Show and sonify waveforms")
 
 The sonified/amplitude-normalized waveform is playable via the audio player component marked with **1**, alongside the details of the event shown in table representation (**2**), where the approximated country and state extracted based on longitude and latitude (in case of earthquake below water, or other non-determinable location, N/A will be shown).
-
 The earthquake were represented in waveform (**3**) and spectrogram view (**4**) as well.
 
 
