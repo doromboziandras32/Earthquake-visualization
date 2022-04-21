@@ -7,14 +7,17 @@
     ```
     pip install -r requirements.txt
     ```
-4a. Open jupyter notebook **Plot_test_map_leaflet.ipynb**
-5a. Click on **Run All Cells**
+4. Open jupyter notebook **Plot_test_map_leaflet.ipynb**
+5. Click on **Run All Cells**
+6. After all cells are executed, open the following link: **[Dash App](http://127.0.0.1:8050/)**
 
 OR 
 4b. Run **app.py** via terminal with the corresponding environtment's python executable
 
+5b. Open the following link after *Dash is running on...* message appears: **[Dash App](http://127.0.0.1:8050/)**
 
-6. After all cells are executed, open the following link: **[Dash App](http://127.0.0.1:8050/)**
+
+
 
 
 
