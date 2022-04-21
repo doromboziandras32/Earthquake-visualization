@@ -20,7 +20,7 @@ def create_seismic_sound_to_dash_bytes(x):
     #print('Normalize')
     norm_x =  x1/x1.std()
     #print('Resample')
-    norm_x_resampled = librosa.resample(norm_x, x.stats.sampling_rate, 8000)
+    norm_x_resampled = librosa.resample(norm_x, orig_sr = x.stats.sampling_rate, target_sr = 8000)
     #print('Export')
     out_audio = BytesIO()
     sf.write(out_audio,norm_x_resampled,8000,format = 'wav')
