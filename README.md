@@ -1,5 +1,6 @@
 <h1>Eartquake event visualization and sonification on Dashboard </h1>
 Installation and running the visualization:
+
 1. Install the requirements from the attached txt:
     ```
     pip install -r requirements.txt
