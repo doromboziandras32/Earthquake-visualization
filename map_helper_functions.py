@@ -10,6 +10,23 @@ import dash_leaflet.express as dlx
 import obspy
 from obspy import UTCDateTime
 from geopy.geocoders import Nominatim
+from obspy.clients.fdsn.client import Client
+
+from obspy.clients.fdsn.header import URL_MAPPINGS
+import dash_leaflet as dl
+from dash import Dash, html, dcc, Output, Input
+from dash_extensions.javascript import assign
+import dash_bootstrap_components as dbc
+from dash import dash_table
+
+import dash
+from dash import dcc
+from dash import html
+
+from dash.dependencies import Input,Output,State
+from dash import callback_context
+import dash_leaflet as dl
+from dash_extensions.javascript import assign
 
 geolocator = Nominatim(user_agent="geoapiExercises")
 #Extract the proper seismic instrument
