@@ -2,7 +2,7 @@
 <h2>Installation and running the visualization</h2>
 
 1. Pull down the repository
-2. It is recommended to create a new conda environment, then apply the following steps there 
+2. It is recommended to create a new conda environment with **python 3.8**, then apply the following steps there 
 3. Install the requirements from the attached txt:
     ```
     pip install -r requirements.txt

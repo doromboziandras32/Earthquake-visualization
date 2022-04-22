@@ -10,4 +10,3 @@ obspy==1.2.2
 pandas==1.1.5
 SoundFile==0.10.3.post1
 ipykernel==5.5.5
-charset-normalizer==2.0.12

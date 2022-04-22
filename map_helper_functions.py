@@ -48,10 +48,28 @@ def create_seismic_sound_to_dash_bytes(x):
 
     return "data:audio/wav;base64,{}".format(encoded)
 
+#Simplified waveform spectrogram plot  https://stackoverflow.com/questions/35420052/adding-colorbar-to-a-spectrogram
+def create_waveform_spectrogram(waveform):
+    fig = plt.figure()
+    subfigs = fig.subfigures(2, 1)
+    #ax1 = fig.add_subplot(211)
+    ax2 = subfigs[1].add_subplot(111)
+    ax3 = subfigs[1].add_subplot(121)
+    
+    
+    wf = waveform.plot(fig = subfigs[0])
+
+    #plot spectrogram (bottom subfigure)    
+    #fig = spl2
+    waveform.filter("highpass", freq=0.5).spectrogram(show=False, axes=ax2)
+    mappable = ax2.images[0]
+    plt.colorbar(mappable=mappable, cax=ax3)
+
+    
 
 def fig_to_uri(in_fig, close_all=True, **save_args):
     px = 1/plt.rcParams['figure.dpi']
-    fig = plt.figure(figsize=(600*px, 200*px))
+    fig = plt.figure(figsize=(500*px, 200*px))
     
     out_img = BytesIO()
     if isinstance(in_fig,obspy.core.Trace):
@@ -79,8 +97,10 @@ def spectrogram_to_uri(input_data, close_all=True, **save_args):
     
     #f, t, Sxx = signal.spectrogram(input_data.filter("highpass", freq=0.5).data, input_data.stats.sampling_rate)
     px = 1/plt.rcParams['figure.dpi']
-    plt.figure(figsize=(600*px, 250*px))
+    plt.figure(figsize=(700*px, 250*px))
     f, t, Sxx,e = plt.specgram(x = input_data.filter("highpass", freq=0.5).data, Fs = input_data.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
+    clbr = plt.colorbar(e)
+    clbr.ax.set_ylabel('Amplitude (dB)')
     #TODO: https://stackoverflow.com/questions/27210394/matplotlib-spectrogram-intensity-legend-colorbar
     #https://stackoverflow.com/questions/35420052/adding-colorbar-to-a-spectrogram: maybe refarctor the spectrogram and waveform based on that
     #plt.pcolormesh(t, f, np.log10(Sxx))
