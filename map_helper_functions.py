@@ -81,7 +81,8 @@ def spectrogram_to_uri(input_data, close_all=True, **save_args):
     px = 1/plt.rcParams['figure.dpi']
     plt.figure(figsize=(600*px, 250*px))
     f, t, Sxx,e = plt.specgram(x = input_data.filter("highpass", freq=0.5).data, Fs = input_data.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
-    
+    #TODO: https://stackoverflow.com/questions/27210394/matplotlib-spectrogram-intensity-legend-colorbar
+    #https://stackoverflow.com/questions/35420052/adding-colorbar-to-a-spectrogram: maybe refarctor the spectrogram and waveform based on that
     #plt.pcolormesh(t, f, np.log10(Sxx))
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
