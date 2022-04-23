@@ -27,6 +27,7 @@ from dash.dependencies import Input,Output,State
 from dash import callback_context
 import dash_leaflet as dl
 from dash_extensions.javascript import assign
+from datetime import datetime, timedelta
 
 geolocator = Nominatim(user_agent="geoapiExercises")
 #Extract the proper seismic instrument
@@ -50,20 +51,45 @@ def create_seismic_sound_to_dash_bytes(x):
 
 #Simplified waveform spectrogram plot  https://stackoverflow.com/questions/35420052/adding-colorbar-to-a-spectrogram
 def create_waveform_spectrogram(waveform):
-    fig = plt.figure()
-    subfigs = fig.subfigures(2, 1)
-    #ax1 = fig.add_subplot(211)
-    ax2 = subfigs[1].add_subplot(111)
-    ax3 = subfigs[1].add_subplot(121)
-    
-    
-    wf = waveform.plot(fig = subfigs[0])
+    px = 1/plt.rcParams['figure.dpi']
+    #wf = fig_to_uri(waveform)
 
-    #plot spectrogram (bottom subfigure)    
-    #fig = spl2
-    waveform.filter("highpass", freq=0.5).spectrogram(show=False, axes=ax2)
+    fig = plt.figure(figsize=(800*px, 500*px))
+    ax1 = fig.add_axes([0.1, 0.75, 0.7, 0.4]) #[left bottom width height]
+    ax2 = fig.add_axes([0.1, 0.1, 0.7, 0.50],sharex = ax1)
+    ax3 = fig.add_axes([0.83, 0.1, 0.03, 0.5])
+
+    #make time vector
+    t = np.arange(waveform.stats.npts) / waveform.stats.sampling_rate
+    time_split = np.arange(np.datetime64(waveform.stats['starttime']), np.datetime64(waveform.stats['endtime']), timedelta(seconds=10)).astype('datetime64[s]')
+    #plot waveform (top subfigure)    
+    ax1.plot(t, waveform.data, 'k')
+    #ax1.plot(wave_test.data)
+    ax1.set_xticks(np.arange(0,60)[::10])
+    ax1.set_xticklabels(time_split)
+    ax1.get_xaxis().set_visible(False)
+
+    #plot spectrogram (bottom subfigure)
+    #spl2 = wave_test
+    #spl2.spectrogram(show=False, axes=ax2)
+    ax2.specgram(x = waveform.filter("highpass", freq=0.5).data, Fs = waveform.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
+    ax2.set_xlabel('Time [sec]')
+    ax2.set_ylabel('Frequency [Hz]')
+    #ax2.set_title('')
+    ax2.set_xticks(np.arange(0,60)[::10])
+    ax2.set_xticklabels(time_split,rotation=45)
     mappable = ax2.images[0]
-    plt.colorbar(mappable=mappable, cax=ax3)
+    plt.colorbar(mappable=mappable, cax=ax3,label = 'Amplitude (dB)')
+    out_img = BytesIO()
+    
+    fig.savefig(out_img, format='png')
+    fig.clf()            
+    plt.close('all') 
+    out_img.seek(0)  # rewind file
+    encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
+    #return encoded
+    return "data:image/png;base64,{}".format(encoded)
+
 
     
 
