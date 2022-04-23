@@ -103,6 +103,57 @@ return L.marker(latlng, {icon: antenna});
 
 
 #app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
+
+import dash_leaflet as dl
+from dash import Dash, html, dcc, Output, Input
+from dash_extensions.javascript import assign
+import dash_bootstrap_components as dbc
+from dash import dash_table
+
+import dash
+from dash import dcc
+from dash import html
+
+from dash.dependencies import Input,Output,State
+from dash import callback_context
+import dash_leaflet as dl
+from dash_extensions.javascript import assign
+
+
+colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
+chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"  # js lib used for colors
+color_prop = 'source_magnitude'
+colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min_magnitude, max=max_magnitude, unit='km')
+detail_colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150,  unit='km', min=min_magnitude, max=max_magnitude, id = 'detail_map_colorbar')
+# Geojson rendering logic, must be JavaScript as it is executed in clientside.
+point_to_layer = assign("""function(feature, latlng, context){
+    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
+    const csc = chroma.scale(colorscale).domain([min, max]);  // chroma lib to construct colorscale
+    circleOptions.fillColor = csc(feature.properties[colorProp]);  // set color based on color prop.
+    return L.circleMarker(latlng, circleOptions);  // sender a simple circle marker.
+}""")
+
+
+#icons/antenna_img.png
+# 
+# `https://github.com/doromboziandras32/Interdisciplinary/blob/master/icons/antenna_img.png`
+draw_antenna = assign("""function(feature, latlng){
+const antenna = L.icon({iconUrl: `/static/antenna_img.png`, iconSize: [24,24]});
+return L.marker(latlng, {icon: antenna});
+}""")
+
+
+draw_antenna_on_detail_map = assign("""function(feature, latlng){
+const antenna = L.icon({iconUrl: `/static/antenna_img.png`, iconSize: [40,40]});
+return L.marker(latlng, {icon: antenna});
+}""")
+
+
+
+#https://fonts.google.com/icons?selected=Material%20Icons%3Asettings_input_antenna%3A
+
+
+#app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
 app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.MATERIA] ,prevent_initial_callbacks=True)
 
 app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
@@ -262,11 +313,7 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                         children = [
                                                     html.Div(style={ 'display': 'block','vertical-align':'middle'}, id = 'seismogram-div',
                                                     children = [html.Img(id ='seismogram_img'
-                                                    , src = base_seismogram
-                                                    )]),                                        
-                                                    html.Div(style={ 'display': 'block','vertical-align':'middle'}, id = 'spectrogram-div',
-                                                    children = [html.Img( id ='spectrogram_img'
-                                                    ,src = spectrogram_plot
+                                                    , src = new_wave_spectrogram, style= {'width': '100%'}
                                                     )])
                                                     ])])
                                 ),
@@ -347,7 +394,7 @@ def switch_view(button_value):
 
 @app.callback(Output("event_info_table", "data"),
             Output('seismogram_img', 'src'),
-            Output('spectrogram_img', 'src'), 
+            #Output('spectrogram_img', 'src'), 
             Output('audio_player_main', 'src'),
             Output('audio_player_main', 'style'),
             Output('multi-view-row', 'children'),            
@@ -360,7 +407,7 @@ def switch_view(button_value):
             Input('clear-compare-view', 'n_clicks'),
             State("event_info_table", "data"),
             State('seismogram_img', 'src'),
-            State('spectrogram_img', 'src'),
+            #State('spectrogram_img', 'src'),
             State('audio_player_main', 'src'),
             State('audio_player_main', 'style'),
 
@@ -369,7 +416,7 @@ def switch_view(button_value):
             State(component_id="event-no-match-alert", component_property= 'children')
 )
 
-def select_event(clicked_event,clicked_detail_event,click_compare_button,current_event_table ,current_seismogram_image, current_spectrogram_image,current_audio_src,audio_div_element,current_view, div_multi_row_elements, current_alert_msg):
+def select_event(clicked_event,clicked_detail_event,click_compare_button,current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,current_view, div_multi_row_elements, current_alert_msg):
 
     ctx = dash.callback_context
     clicked_element = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -389,7 +436,7 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
         cleared_elements = [html.Div(html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
         
         
-        return [current_event_table ,current_seismogram_image, current_spectrogram_image,current_audio_src,audio_div_element,cleared_elements, current_alert_msg, alert_state]
+        return [current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,cleared_elements, current_alert_msg, alert_state]
 
     if clicked_event is not None:
         selected_trace_name = clicked_event['properties']['trace_name']
@@ -405,9 +452,9 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
             
             wave = extract_waveform(client, selected_event)
 
-            spectrogram_plot = spectrogram_to_uri(wave)
+            #spectrogram_plot = spectrogram_to_uri(wave)
 
-            seismic_plot = fig_to_uri(wave)
+            seismic_plot = create_waveform_spectrogram(wave)
 
             
             audio_src = html.Source(src=create_seismic_sound_to_dash_bytes(wave),type='audio/wav')
@@ -419,7 +466,7 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
             alert_state = True
 
             seismic_plot = current_seismogram_image
-            spectrogram_plot = current_spectrogram_image
+            #spectrogram_plot = current_spectrogram_image
             table_data = current_event_table
             audio_src = current_audio_src
             audio_player_style = audio_div_element
@@ -427,7 +474,7 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
             #return dash.no_update
         if current_view == 'simple':
         #return [table_data,seismic_plot,spectrogram_plot,audio_src,audio_player_style,div_simple_row_style,div_multi_row_style,div_multi_row_elements]
-            return [table_data,seismic_plot,spectrogram_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state]
+            return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state]
 
         elif current_view == 'multi':
             if len(div_multi_row_elements) < 5:
@@ -435,21 +482,18 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
                 
                 if alert_state is False:
                 #new_div = html.Div(style={'marginLeft': 5,'marginTop': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left'},
-                    new_div = html.Div(style={'marginBottom': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left','width':'600px'},
+                    new_div = html.Div(style={'marginBottom': 5, 'marginRight':0,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left','width':'500px'},
                                         children = [
                                             html.Div(
-                                                    style={'display': 'block','vertical-align':'left'}, 
+                                                    style={'display': 'block','vertical-align':'center'}, 
                                                     children = html.Audio(src = audio_src, controls=True)),
 
                                             html.Div(
-                                                    style={'display': 'block','vertical-align':'left'}, 
-                                                    children = html.Img( src = seismic_plot)),
-                                            html.Div(
-                                                    style={'display': 'block','vertical-align':'left', 'marginBottom' : 10}, 
-                                                    children = html.Img( src = spectrogram_plot)),
+                                                    style={'display': 'block','vertical-align':'left','margin':'0'}, 
+                                                    children = html.Img( src = seismic_plot, style= {'width': '100%'})),
                                         
                                             html.Div(
-                                                    style={'display': 'block','vertical-align':'left','width':'500px'},
+                                                    style={'display': 'block','vertical-align':'left','width':'450px','margin':'0'},
                                                     children =   dash_table.DataTable(style_header={'display':'none'}
                                                 ,style_cell={"whiteSpace": "pre-line"}                                      
                                                 ,data = table_data
@@ -466,7 +510,7 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
                     div_multi_row_elements.append(new_div)           
 
 
-                return [table_data,seismic_plot,spectrogram_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state]
+                return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state]
             #TODO:currently just no update, but some warning dialog will be implemented later
             else:
                 return dash.no_update

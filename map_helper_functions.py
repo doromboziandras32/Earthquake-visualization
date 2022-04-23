@@ -57,7 +57,7 @@ def create_waveform_spectrogram(waveform):
     fig = plt.figure(figsize=(800*px, 500*px))
     ax1 = fig.add_axes([0.1, 0.6, 0.7, 0.3]) #[left bottom width height]
     ax2 = fig.add_axes([0.1, 0.1, 0.7, 0.40],sharex = ax1)
-    ax3 = fig.add_axes([0.83, 0.25, 0.03, 0.45])
+    ax3 = fig.add_axes([0.83, 0.1, 0.03, 0.40])
 
     #make time vector
     t = np.arange(waveform.stats.npts) / waveform.stats.sampling_rate
@@ -72,7 +72,8 @@ def create_waveform_spectrogram(waveform):
     #plot spectrogram (bottom subfigure)
     #spl2 = waveform
     #spl2.spectrogram(show=False, axes=ax2)
-    ax2.specgram(x = waveform.filter("highpass", freq=0.5).data, Fs = waveform.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
+    #ax2.specgram(x = waveform.filter("highpass", freq=0.5).data, Fs = waveform.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
+    waveform.filter("highpass", freq=0.5).spectrogram(show = False, axes = ax2)
     ax2.set_xlabel('Time [sec]')
     ax2.set_ylabel('Frequency [Hz]')
     #ax2.set_title('')
