@@ -103,7 +103,6 @@ return L.marker(latlng, {icon: antenna});
 
 
 #app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
-
 import dash_leaflet as dl
 from dash import Dash, html, dcc, Output, Input
 from dash_extensions.javascript import assign
@@ -238,6 +237,22 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                             )
                                             ],
                                             id = "event-no-match-modal",
+                                            is_open = False,
+                                            centered=True
+                                        ),
+                                #TODO: if we want to close a div, we should define a pattern matching callback (https://dash.plotly.com/pattern-matching-callbacks)
+                                #https://medium.com/plotly/pattern-matching-callbacks-in-dash-9014eee99858
+                                dbc.Modal( 
+                                            [
+                                            dbc.ModalHeader(
+                                                dbc.ModalTitle("Warning"), close_button=True
+                                            ),
+                                            dbc.ModalBody(
+                                                children = 'Number of comparable events (6) has been exceeded. In order to add new elements, click on "Clear selection" to remove the previous elements',
+                                                id="compare-view-limit-exceed-alert"                                                
+                                            )
+                                            ],
+                                            id = "compare-view-limit-exceed-modal",
                                             is_open = False,
                                             centered=True
                                         ),
@@ -400,6 +415,7 @@ def switch_view(button_value):
             Output('multi-view-row', 'children'),            
             Output(component_id="event-no-match-alert", component_property= 'children'),
             Output(component_id="event-no-match-modal", component_property= 'is_open'),    
+            Output(component_id="compare-view-limit-exceed-modal", component_property= 'is_open'),   
 
         
             Input("earthquake_events_geojson", "click_feature"),
@@ -421,13 +437,18 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
     ctx = dash.callback_context
     clicked_element = ctx.triggered[0]['prop_id'].split('.')[0]
     alert_state = False
+    compare_view_exceed_state = False
     audio_player_style = {}
     if clicked_element == "earthquake_events_geojson":
         if ctx.triggered[0]['value'] is not None:
-            if ctx.triggered[0]['value']['properties']['cluster'] is True:
-                return dash.no_update
-            else:
-                clicked_event = ctx.triggered[0]['value']
+            try:
+                if ctx.triggered[0]['value']['properties']['cluster'] is True:
+                    return dash.no_update
+                else:
+                    clicked_event = ctx.triggered[0]['value']
+            except KeyError:
+                print(ctx.triggered[0]['value'])
+                raise KeyError
     
     if clicked_element == "detail_map_earthquake_geojson":
         clicked_event = ctx.triggered[0]['value']
@@ -436,7 +457,7 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
         cleared_elements = [html.Div(html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
         
         
-        return [current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,cleared_elements, current_alert_msg, alert_state]
+        return [current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,cleared_elements, current_alert_msg, alert_state,compare_view_exceed_state]
 
     if clicked_event is not None:
         selected_trace_name = clicked_event['properties']['trace_name']
@@ -474,10 +495,10 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
             #return dash.no_update
         if current_view == 'simple':
         #return [table_data,seismic_plot,spectrogram_plot,audio_src,audio_player_style,div_simple_row_style,div_multi_row_style,div_multi_row_elements]
-            return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state]
+            return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
 
         elif current_view == 'multi':
-            if len(div_multi_row_elements) < 5:
+            if len(div_multi_row_elements) < 7:
                  
                 
                 if alert_state is False:
@@ -509,11 +530,12 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
                                     
                     div_multi_row_elements.append(new_div)           
 
-
-                return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state]
+                return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
             #TODO:currently just no update, but some warning dialog will be implemented later
             else:
-                return dash.no_update
+                compare_view_exceed_state = True
+                return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
+                #return dash.no_update
 
          
     else:

@@ -55,32 +55,39 @@ def create_waveform_spectrogram(waveform):
     #wf = fig_to_uri(waveform)
 
     fig = plt.figure(figsize=(800*px, 500*px))
-    ax1 = fig.add_axes([0.1, 0.6, 0.7, 0.3]) #[left bottom width height]
-    ax2 = fig.add_axes([0.1, 0.1, 0.7, 0.40],sharex = ax1)
-    ax3 = fig.add_axes([0.83, 0.1, 0.03, 0.40])
+    #ax1 = fig.add_axes([0.1, 0.6, 0.7, 0.3]) #[left bottom width height]
+    #ax2 = fig.add_axes([0.1, 0.1, 0.7, 0.40],sharex = ax1)
+    #ax3 = fig.add_axes([0.83, 0.1, 0.03, 0.40])
+    ax1 = fig.add_axes([0.18, 0.6, 0.7, 0.3]) #[left bottom width height]
+    ax2 = fig.add_axes([0.18, 0.1, 0.7, 0.40],sharex = ax1)
+    ax3 = fig.add_axes([0.9, 0.1, 0.03, 0.40])
 
     #make time vector
     t = np.arange(waveform.stats.npts) / waveform.stats.sampling_rate
-    time_split = np.arange(np.datetime64(waveform.stats['starttime']), np.datetime64(waveform.stats['endtime']), timedelta(seconds=20)).astype('datetime64[s]')
+    time_split = list(np.arange(np.datetime64(waveform.stats['starttime']), np.datetime64(waveform.stats['endtime']), timedelta(seconds=20)).astype('datetime64[s]'))
+    time_split.append(np.datetime64(waveform.stats['endtime']).astype('datetime64[s]'))
     #plot waveform (top subfigure)    
     ax1.plot(t, waveform.data, 'k')
     #ax1.plot(waveform.data)
-    ax1.set_xticks(np.arange(0,60)[::20])
+    ax1.set_xticks(np.arange(0,61)[::20])
     ax1.set_xticklabels(time_split)
     ax1.get_xaxis().set_visible(False)
+    ax1.set_ylabel('Amplitude (dB)', fontsize=18)
+    ax1.tick_params(axis='y', labelsize=13)
 
     #plot spectrogram (bottom subfigure)
     #spl2 = waveform
     #spl2.spectrogram(show=False, axes=ax2)
-    #ax2.specgram(x = waveform.filter("highpass", freq=0.5).data, Fs = waveform.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
     waveform.filter("highpass", freq=0.5).spectrogram(show = False, axes = ax2)
-    ax2.set_xlabel('Time [sec]')
-    ax2.set_ylabel('Frequency [Hz]')
+    #ax2.specgram(x = waveform.filter("highpass", freq=0.5).data, Fs = waveform.stats.sampling_rate,scale = 'dB',cmap = 'viridis')
+    ax2.set_xlabel('Time [sec]', fontsize=15)
+    ax2.set_ylabel('Frequency [Hz]', fontsize=15)
     #ax2.set_title('')
-    ax2.set_xticks(np.arange(0,60)[::20])
-    ax2.set_xticklabels(time_split)
+    ax2.set_xticks(np.arange(0,61)[::20])
+    ax2.set_xticklabels(time_split, fontsize=13)
+    ax2.tick_params(axis='y', labelsize=13)
     mappable = ax2.images[0]
-    plt.colorbar(mappable=mappable, cax=ax3,label = 'Amplitude (dB)')
+    plt.colorbar(mappable=mappable, cax=ax3).set_label(size=15,label = 'Amplitude (dB)')
     out_img = BytesIO()
     
     fig.savefig(out_img, format='png')
