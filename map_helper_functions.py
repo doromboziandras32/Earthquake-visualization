@@ -72,7 +72,7 @@ def create_waveform_spectrogram(waveform):
     ax1.set_xticks(np.arange(0,61)[::20])
     ax1.set_xticklabels(time_split)
     ax1.get_xaxis().set_visible(False)
-    ax1.set_ylabel('Amplitude (dB)', fontsize=18)
+    ax1.set_ylabel('Velocity (counts)', fontsize=18)
     ax1.tick_params(axis='y', labelsize=13)
 
     #plot spectrogram (bottom subfigure)

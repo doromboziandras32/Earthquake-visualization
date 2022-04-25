@@ -36,9 +36,7 @@ clien = Client(clien)
 wave_test = extract_waveform(clien, selected_event)
 
 o_file = create_seismic_sound_to_dash_bytes(wave_test)
-spectrogram_plot = spectrogram_to_uri(wave_test)
-
-base_seismogram = fig_to_uri(wave_test)
+new_wave_spectrogram = create_waveform_spectrogram(wave_test)
 
 #Latitudes and longitudes
 site_lat = df_events.source_latitude
