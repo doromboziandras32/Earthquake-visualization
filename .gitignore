@@ -12,3 +12,7 @@ csvs/earthquake_metadata copy.csv
 csvs_backup/earthquake_metadata.csv
 csvs_backup/earthquake_metadata copy.csv
 csvs/chunk2.csv
+amplitude_nromalized_test_sample_old_method.wav
+amplitude_nromalized_test_sample_rms_hackaudio.wav
+amplitude_nromalized_test_sample_rms.wav
+amplitude_nromalized_test_sample.wav

@@ -30,18 +30,32 @@ from dash_extensions.javascript import assign
 from datetime import datetime, timedelta
 
 geolocator = Nominatim(user_agent="geoapiExercises")
+def normalize_amplitude(waveform, rms_level):
+    """
+    Normalize the signal given a certain technique (rms).
+    Args:
+        - waveform    (np.array) : input waveform.
+        - rms_level (int) : desired rms level in dB.(DBFS scale)
+    """
+    sig = waveform.data
+    
+    r = 10**(rms_level / 20.0)
+    a = np.sqrt( (len(sig) * r**2) / np.sum(sig**2) )
+
+    # normalize
+    y = sig * a
+
+    return y
 #Extract the proper seismic instrument
 #index: 0: north-south, 1: east-west, 2:vertical
-def create_seismic_sound_to_dash_bytes(x):
-    #print('Read')
-    x1 = x.data
-    #print('Normalize')
-    norm_x =  x1/x1.std()
-    #print('Resample')
-    norm_x_resampled = librosa.resample(norm_x, orig_sr = x.stats.sampling_rate, target_sr = 8000)
-    #print('Export')
+def create_seismic_sound_to_dash_bytes(x,rms_level = 0):
+    y = normalize_amplitude(x,rms_level)
+    #Resample audio to make it audible by html.audio
+    y_resampled = librosa.resample(y, orig_sr = x.stats.sampling_rate, target_sr = 8000)
+    
     out_audio = BytesIO()
-    sf.write(out_audio,norm_x_resampled,8000,format = 'wav')
+    #Write to bytes
+    sf.write(out_audio,y_resampled,8000,format = 'wav')
 
     out_audio.seek(0)
     encoded=base64.b64encode(out_audio.read()).decode("ascii").replace("\n", "")
@@ -58,9 +72,9 @@ def create_waveform_spectrogram(waveform):
     #ax1 = fig.add_axes([0.1, 0.6, 0.7, 0.3]) #[left bottom width height]
     #ax2 = fig.add_axes([0.1, 0.1, 0.7, 0.40],sharex = ax1)
     #ax3 = fig.add_axes([0.83, 0.1, 0.03, 0.40])
-    ax1 = fig.add_axes([0.18, 0.6, 0.7, 0.3]) #[left bottom width height]
-    ax2 = fig.add_axes([0.18, 0.1, 0.7, 0.40],sharex = ax1)
-    ax3 = fig.add_axes([0.9, 0.1, 0.03, 0.40])
+    ax1 = fig.add_axes([0.14, 0.6, 0.7, 0.3]) #[left bottom width height]
+    ax2 = fig.add_axes([0.14, 0.1, 0.7, 0.40],sharex = ax1)
+    ax3 = fig.add_axes([0.85, 0.1, 0.03, 0.40])
 
     #make time vector
     t = np.arange(waveform.stats.npts) / waveform.stats.sampling_rate
@@ -73,7 +87,7 @@ def create_waveform_spectrogram(waveform):
     ax1.set_xticklabels(time_split)
     ax1.get_xaxis().set_visible(False)
     ax1.set_ylabel('Velocity (counts)', fontsize=18)
-    ax1.tick_params(axis='y', labelsize=13)
+    ax1.tick_params(axis='y', labelsize=10)
 
     #plot spectrogram (bottom subfigure)
     #spl2 = waveform
@@ -84,8 +98,8 @@ def create_waveform_spectrogram(waveform):
     ax2.set_ylabel('Frequency [Hz]', fontsize=15)
     #ax2.set_title('')
     ax2.set_xticks(np.arange(0,61)[::20])
-    ax2.set_xticklabels(time_split, fontsize=13)
-    ax2.tick_params(axis='y', labelsize=13)
+    ax2.set_xticklabels(time_split, fontsize=10)
+    ax2.tick_params(axis='y', labelsize=10)
     mappable = ax2.images[0]
     plt.colorbar(mappable=mappable, cax=ax3).set_label(size=15,label = 'Amplitude (dB)')
     out_img = BytesIO()

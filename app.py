@@ -15,6 +15,8 @@ import dash_leaflet as dl
 from dash_extensions.javascript import assign
 
 
+
+
 df_events = pd.read_csv("csvs/earthquake_metadata.csv",low_memory=False)
 
 df_events.set_index('trace_name',inplace= True)
@@ -67,54 +69,10 @@ data_points_geojson = dataframe_to_geojson(df_events)
 
 
 
-colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
-chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"  # js lib used for colors
-color_prop = 'source_magnitude'
-colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min_magnitude, max=max_magnitude, unit='km')
-detail_colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150,  unit='km', min=min_magnitude, max=max_magnitude, id = 'detail_map_colorbar')
-# Geojson rendering logic, must be JavaScript as it is executed in clientside.
-point_to_layer = assign("""function(feature, latlng, context){
-    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
-    const csc = chroma.scale(colorscale).domain([min, max]);  // chroma lib to construct colorscale
-    circleOptions.fillColor = csc(feature.properties[colorProp]);  // set color based on color prop.
-    return L.circleMarker(latlng, circleOptions);  // sender a simple circle marker.
-}""")
-
-
-#icons/antenna_img.png
-# 
-# `https://github.com/doromboziandras32/Interdisciplinary/blob/master/icons/antenna_img.png`
-draw_antenna = assign("""function(feature, latlng){
-const antenna = L.icon({iconUrl: `/static/antenna_img.png`, iconSize: [24,24]});
-return L.marker(latlng, {icon: antenna});
-}""")
-
-
-draw_antenna_on_detail_map = assign("""function(feature, latlng){
-const antenna = L.icon({iconUrl: `/static/antenna_img.png`, iconSize: [40,40]});
-return L.marker(latlng, {icon: antenna});
-}""")
 
 
 
-#https://fonts.google.com/icons?selected=Material%20Icons%3Asettings_input_antenna%3A
 
-
-#app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
-import dash_leaflet as dl
-from dash import Dash, html, dcc, Output, Input
-from dash_extensions.javascript import assign
-import dash_bootstrap_components as dbc
-from dash import dash_table
-
-import dash
-from dash import dcc
-from dash import html
-
-from dash.dependencies import Input,Output,State
-from dash import callback_context
-import dash_leaflet as dl
-from dash_extensions.javascript import assign
 
 
 colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
@@ -352,12 +310,13 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
     State(component_id='magnitude-slider', component_property= 'value'),
     State(component_id='date-filter', component_property= 'start_date'),
     State(component_id='date-filter', component_property= 'end_date'),
-    State(component_id='provider-selector', component_property= 'value')    
+    State(component_id='provider-selector', component_property= 'value'),
+    State(component_id='map', component_property= 'style')
 )
 
-def apply_filter(apply_click,reset_click, depth_value, magnitude_value,start_date,end_date, selected_providers):
+def apply_filter(apply_click,reset_click, depth_value, magnitude_value,start_date,end_date, selected_providers,overview_map_style):
 
-    style_to_refresh={'width': '70%', 'height': '50vh', 'margin': "auto", "display": "inline-block"}
+    style_to_refresh=overview_map_style
     
     # https://towardsdatascience.com/multi-faceted-data-exploration-in-the-browser-using-leaflet-and-amcharts-f74d049d78d9
     ctx = dash.callback_context
@@ -561,12 +520,13 @@ State(component_id='date-filter', component_property= 'start_date'),
 State(component_id='date-filter', component_property= 'end_date'),
 State(component_id='provider-selector', component_property= 'value') ,
 State(component_id='stations_geojson', component_property= 'click_feature'),
+State(component_id='detail_map', component_property= 'style')
 
 )
 
-def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magnitude_value,start_date,end_date, selected_providers,last_selected_station):
+def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magnitude_value,start_date,end_date, selected_providers,last_selected_station,detail_map_style):
 
-    style_to_refresh={'width': '30%', 'height': '50vh', 'margin': "auto", "display": "inline-block"}
+    style_to_refresh=detail_map_style
 
     ctx = dash.callback_context
     clicked_element = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -628,7 +588,7 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
     elif clicked_element == 'stations_geojson':        
         
         if clicked_event is not None and clicked_event['properties']['cluster'] is False:
-            style_to_refresh={'width': '30%', 'height': '50vh', 'margin': "auto", "display": "inline-block"}
+            
             selected_station_id = clicked_event['properties']['station_id']
             station_record = stations_df[stations_df['station_id'] == selected_station_id]
 
