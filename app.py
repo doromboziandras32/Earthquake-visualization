@@ -103,7 +103,7 @@ return L.marker(latlng, {icon: antenna});
 
 #https://fonts.google.com/icons?selected=Material%20Icons%3Asettings_input_antenna%3A
 
-## App 
+
 #app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
 app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.MATERIA] ,prevent_initial_callbacks=True)
 
@@ -210,7 +210,10 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                         ),
                                 html.Div( 
                                         style={'width':'98%','display':'inline-block',"border":"2px black solid"},                                                                                
-                                        children = [dl.Map(children=[
+                                        children = [html.H6(['Select an event either on the left map (Overview map) or on the right map (Detail map) to show the spectrogram and waveform image and the sonfified audible waveform',
+                                                            html.Br(),
+                                                            'Select a station (antenna symbol) on the Overview map in order to show the corresponding events on the Detail map.']),
+                                                    dl.Map(children=[
                                                     dl.TileLayer(),
                                                     dl.GeoJSON(data = data_points_geojson,
                                                     options=dict(pointToLayer=point_to_layer),  # how to draw points            
