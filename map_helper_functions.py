@@ -37,7 +37,8 @@ def normalize_amplitude(waveform, rms_level):
         - waveform    (np.array) : input waveform.
         - rms_level (int) : desired rms level in dB.(DBFS scale)
     """
-    sig = waveform.data
+    sig_highpass_filterd = waveform.filter("highpass", freq=0.5)
+    sig = sig_highpass_filterd.data
     
     r = 10**(rms_level / 20.0)
     a = np.sqrt( (len(sig) * r**2) / np.sum(sig**2) )
@@ -86,7 +87,7 @@ def create_waveform_spectrogram(waveform):
     ax1.set_xticks(np.arange(0,61)[::20])
     ax1.set_xticklabels(time_split)
     ax1.get_xaxis().set_visible(False)
-    ax1.set_ylabel('Velocity (counts)', fontsize=18)
+    ax1.set_ylabel('Amplitude counts', fontsize=18)
     ax1.tick_params(axis='y', labelsize=10)
 
     #plot spectrogram (bottom subfigure)
