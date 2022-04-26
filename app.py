@@ -71,10 +71,6 @@ data_points_geojson = dataframe_to_geojson(df_events)
 
 
 
-
-
-
-
 colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"  # js lib used for colors
 color_prop = 'source_magnitude'
@@ -107,7 +103,7 @@ return L.marker(latlng, {icon: antenna});
 
 #https://fonts.google.com/icons?selected=Material%20Icons%3Asettings_input_antenna%3A
 
-
+## App 
 #app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
 app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.MATERIA] ,prevent_initial_callbacks=True)
 
@@ -171,7 +167,7 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                                                 ),
                                                 ])]),
                                              html.Div(
-                                                  style={'display': 'block','text-align': 'center'},
+                                                  style={'display': 'block','text-align': 'center','marginBottom': 10},
                                                  children = [                                                      
                                                              dbc.Button('Apply Filters', id='filter-apply-btn', n_clicks=0, color = 'primary'),
                                                              dbc.Button('Reset Filters', id='filter-reset-btn', n_clicks=0, color = 'secondary')
@@ -213,15 +209,8 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                             centered=True
                                         ),
                                 html.Div( 
-                                        style={'width':'98%', 'marginRight': 0.8,'display':'inline-block',"border":"2px black solid"},                                                                                
-                                        children = [dcc.RadioItems(options=[{
-                                                                    'value':'simple','label': 'Simple-event view'},
-                                                                    {'value':'multi', 'label': 'Event-Compare view'                                                            
-                                                                    }],
-                                                                    value='simple', id ='view-selector-radio',labelStyle={'display': 'inline-block',
-                                                                                                                            'margin-left': '7px'}
-                                                    )
-                                            ,dl.Map(children=[
+                                        style={'width':'98%','display':'inline-block',"border":"2px black solid"},                                                                                
+                                        children = [dl.Map(children=[
                                                     dl.TileLayer(),
                                                     dl.GeoJSON(data = data_points_geojson,
                                                     options=dict(pointToLayer=point_to_layer),  # how to draw points            
@@ -260,7 +249,20 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                                  style={'width': '35%', 'height': '50vh', "display": "inline-block"}, id="detail_map",maxZoom = 20)
                                                  ]
 
-                                )]),
+                                ),
+                            html.Div(
+                                style={'display': 'block','marginBottom': 2,'marginTop': 5},
+                                children = [html.H6('Select  whether to show a single event, or compare view (up to 6 events at once)'),
+                                            dcc.RadioItems(options=[{
+                                                                    'value':'simple','label': 'Simple-event view'},
+                                                                    {'value':'multi', 'label': 'Event-Compare view'                                                            
+                                                                    }],
+                                                                    value='simple', id ='view-selector-radio',labelStyle={'display': 'inline-block',
+                                                                                                                            'margin-left': '7px'}
+                                            )
+                                            
+                                ])
+                            ]),
                         dbc.Row(id = 'simple-view-row',style = {'display': 'inline-block'},children=html.Div([
                     #Audio player
                                 html.Div(                                    
