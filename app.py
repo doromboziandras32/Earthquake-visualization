@@ -272,7 +272,7 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                         style={'marginBottom': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'top','width':'600px'},                          
                                     children = [
                                                 
-                                                html.Audio(html.Source(src=f'/assets/test_raw_waveform_normalized_upsampled.wav',type='audio/wav'), controls=True, id = 'audio_player_main'),                                          
+                                                html.Audio(html.Source(src=o_file,type='audio/wav'), controls=True, id = 'audio_player_main'),                                          
                                                     dash_table.DataTable(id = 'event_info_table',style_header={'display':'none'}
                                                     ,style_cell={"whiteSpace": "pre-line"}                                                
                                                     ,data = create_event_infos(df_events,'KAN08.GS_20150408005359_EV')
@@ -294,7 +294,7 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                                     ])])
                                 ),
                         dbc.Row(id = 'multi-view-row',style = { 'display': 'none'},
-                                children = [html.Div(html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
+                                children = [html.Div(id = 'clear-compare-view-div',children = html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
                                 )])
 
 
@@ -383,6 +383,10 @@ def switch_view(button_value):
             Input("earthquake_events_geojson", "click_feature"),
             Input("detail_map_earthquake_geojson", "click_feature"),
             Input('clear-compare-view', 'n_clicks'),
+            #Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'),
+            #Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'),
+            Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'),
+            
             State("event_info_table", "data"),
             State('seismogram_img', 'src'),
             #State('spectrogram_img', 'src'),
@@ -392,12 +396,18 @@ def switch_view(button_value):
             State(component_id='view-selector-radio', component_property= 'value'),
             State('multi-view-row', 'children'),
             State(component_id="event-no-match-alert", component_property= 'children')
+            #State(component_id="event-no-match-alert", component_property= 'children')
+
+            #State({'type': 'close-div', 'parent': ALL}, 'id')
 )
 
-def select_event(clicked_event,clicked_detail_event,click_compare_button,current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,current_view, div_multi_row_elements, current_alert_msg):
+def select_event(clicked_event,clicked_detail_event,click_compare_button,div_close_button,current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,current_view, div_multi_row_elements, current_alert_msg):
 
     ctx = dash.callback_context
+    
     clicked_element = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+
     alert_state = False
     compare_view_exceed_state = False
     audio_player_style = {}
@@ -412,14 +422,28 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
                 print(ctx.triggered[0]['value'])
                 raise KeyError
     
-    if clicked_element == "detail_map_earthquake_geojson":
+    elif clicked_element == "detail_map_earthquake_geojson":
         clicked_event = ctx.triggered[0]['value']
 
-    if clicked_element == 'clear-compare-view':  
+    elif clicked_element == 'clear-compare-view':  
         cleared_elements = [html.Div(html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
         
         
         return [current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,cleared_elements, current_alert_msg, alert_state,compare_view_exceed_state]
+    
+    #Removal of elements from comparison view
+    else:
+        
+        dictionary_close_btn = dict(subString.split(":") for subString in ctx.triggered[0]['prop_id'].replace('.n_clicks','').replace('{','').replace('}','').replace('"','').split(","))
+        
+        if dictionary_close_btn['type'] == 'close-div':
+            parent_div = dictionary_close_btn['parent']
+            div_multi_row_elements = [d for d in div_multi_row_elements if d['props']['id'] != 'div_' + parent_div]
+            
+            return [current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
+
+        else: return dash.no_update
+        
 
     if clicked_event is not None:
         selected_trace_name = clicked_event['properties']['trace_name']
@@ -465,11 +489,12 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,current
                 
                 if alert_state is False:
                 #new_div = html.Div(style={'marginLeft': 5,'marginTop': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left'},
-                    new_div = html.Div(style={'marginBottom': 5, 'marginRight':0,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left','width':'500px'},
+                    new_div = html.Div(id = 'div_' + selected_trace_name,style={'marginBottom': 5, 'marginRight':0,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left','width':'500px'},
                                         children = [
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'center'}, 
-                                                    children = html.Audio(src = audio_src, controls=True)),
+                                                    children = [html.Div(html.Audio(src = audio_src, controls=True),style={'display': 'inline-block', 'float': 'left'}),
+                                                               html.Div(html.Button(children = 'Remove',id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),
 
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'left','margin':'0'}, 
@@ -536,7 +561,7 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
     ctx = dash.callback_context
     clicked_element = ctx.triggered[0]['prop_id'].split('.')[0]
     if  clicked_element == 'filter-apply-btn':
-        print(last_selected_station)
+        #print(last_selected_station)
         if last_selected_station is not None and last_selected_station['properties']['cluster'] is False:
             
             selected_station_id = last_selected_station['properties']['station_id']           
