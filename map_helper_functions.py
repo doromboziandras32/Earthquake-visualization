@@ -215,7 +215,7 @@ def create_event_infos(df,x):
     info_dict['longitude'] = longitude
     info_dict['event_recorded_at'] = str(selected_record['time'])
     info_dict['earthquake_depth'] = f'{selected_record["source_depth_km"]} km'
-    info_dict['earthquake_magnitude'] = f'{selected_record["source_magnitude"]} km'
+    info_dict['earthquake_magnitude'] = f'{selected_record["source_magnitude"]}'
 
     return pd.DataFrame.from_dict(info_dict, orient='index').reset_index().to_dict('records')
 
