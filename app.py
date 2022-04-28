@@ -1,6 +1,6 @@
 from map_helper_functions import *
 import dash_leaflet as dl
-from dash import Dash, html, dcc, Output, Input
+from dash import Dash, html, dcc, Output, Input,ALL
 from dash_extensions.javascript import assign
 import dash_bootstrap_components as dbc
 from dash import dash_table
