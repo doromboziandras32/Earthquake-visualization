@@ -75,12 +75,12 @@ colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"  # js lib used for colors
 color_prop = 'source_magnitude'
 
-colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min_magnitude, max=max_magnitude,id = 'overview_map_colorbar')
-colorbar_div = html.Div(children=[html.P("Magnitude"),colorbar], id="colorbar_div", className="info",
-                style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
-detail_colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150,  min=min_magnitude, max=max_magnitude, id = 'detail_map_colorbar')
-detail_colorbar_div = html.Div(children=[html.P("Magnitude"),detail_colorbar], id="detail_colorbar_div", className="info",
-                style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
+colorbar = dl.Colorbar(colorscale=colorscale, width=150, height=20, min=min_magnitude, max=max_magnitude,id = 'overview_map_colorbar', position="bottomleft")
+colorbar_div = html.Div(children=[html.P(html.B("Magnitude")),colorbar], id="colorbar_div",
+                style={"position": "absolute", "left": "55px", "bottom": "30px", "z-index": "1000"})
+detail_colorbar = dl.Colorbar(colorscale=colorscale, width=150, height=20,  min=min_magnitude, max=max_magnitude, id = 'detail_map_colorbar', position="bottomleft")
+detail_colorbar_div = html.Div(children=[html.P(html.B("Magnitude")),detail_colorbar], id="detail_colorbar_div",
+                style={"position": "absolute", "left": "55px", "bottom": "30px", "z-index": "1000"})
 # Geojson rendering logic, must be JavaScript as it is executed in clientside.
 point_to_layer = assign("""function(feature, latlng, context){
     const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
