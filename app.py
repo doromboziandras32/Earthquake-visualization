@@ -74,8 +74,13 @@ data_points_geojson = dataframe_to_geojson(df_events)
 colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"  # js lib used for colors
 color_prop = 'source_magnitude'
-colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min_magnitude, max=max_magnitude, unit='km')
-detail_colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150,  unit='km', min=min_magnitude, max=max_magnitude, id = 'detail_map_colorbar')
+
+colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min_magnitude, max=max_magnitude,id = 'overview_map_colorbar')
+colorbar_div = html.Div(children=[html.P("Magnitude"),colorbar], id="colorbar_div", className="info",
+                style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
+detail_colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150,  min=min_magnitude, max=max_magnitude, id = 'detail_map_colorbar')
+detail_colorbar_div = html.Div(children=[html.P("Magnitude"),detail_colorbar], id="detail_colorbar_div", className="info",
+                style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
 # Geojson rendering logic, must be JavaScript as it is executed in clientside.
 point_to_layer = assign("""function(feature, latlng, context){
     const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
@@ -104,77 +109,12 @@ return L.marker(latlng, {icon: antenna});
 #https://fonts.google.com/icons?selected=Material%20Icons%3Asettings_input_antenna%3A
 
 
-#app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
-app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.MATERIA] ,prevent_initial_callbacks=True)
+app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.BOOTSTRAP] ,prevent_initial_callbacks=True)
+#app = Dash(external_scripts=[chroma],external_stylesheets=[dbc.themes.MATERIA] ,prevent_initial_callbacks=True)
+#app = Dash(external_scripts=[chroma] ,prevent_initial_callbacks=True)
 
-app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
-                                html.Div(style={'marginLeft': 5,'display':'block','vertical-align': 'top'},
-                                         children = [
-                                            html.Div(style={ 'display': 'inline-block','vertical-align':'top', 'width':'25%', 'marginRight': '2%'},
-                                                     children = [
-                                                        html.H6('Providers',style = {'text-align': 'center'}),                                                     
-                                                    #Datepicker to filter for intervals
-                                                         dcc.Dropdown(id='provider-selector', 
-                                                            options=[{'label': i, 'value': i} for i in provider_list],
-                                                            multi=True, 
-                                                            value = provider_list,
-                                                            style={},
-                                                            className='stockselector',
-                                                            clearable=False,
-                                                            placeholder = 'Select providers..',
-                                                            
-                                                            )]), 
-                                            html.Div(style={ 'display': 'inline-block','vertical-align':'top', 'width':'20%', 'marginRight': '2%','text-align': 'center'},
-                                                     children = [
-                                                        html.H6('Date interval'),
-                                                    #Datepicker to filter for intervals
-                                                        dcc.DatePickerRange(
-                                                            id='date-filter',
-                                                            min_date_allowed=min_date,
-                                                            max_date_allowed=max_date,
-                                                            initial_visible_month=min_date,
-                                                            start_date=min_date,
-                                                            end_date=max_date
-                                                        )]),
-                                            html.Div(
-                                                style={ 'display': 'inline-block','vertical-align':'top', 'width':'20%', 'marginRight': '2%','text-align': 'center'},                                                
-                                                children = [
-                                                html.H6('Earthquake depth interval (in km)'),
-                                                #slider to filter for depth
-                                                dcc.RangeSlider(min = min_depth, max = max_depth,
-                                                                id='depth-slider',
-                                                                marks={i: '{:.2f}'.format(i) for i in depth_space},
-                                                                value=[min_depth, max_depth],
-                                                                dots=False,
-                                                                #step=
-                                                                step=0.01,
-                                                                updatemode='drag',
-                                                                tooltip={"placement": "bottom", "always_visible": False}
-                                            )]),
-                                            html.Div(
-                                                style={ 'display': 'inline-block','vertical-align':'top', 'width':'20%','text-align': 'center'},
-                                                children = [
-                                                html.H6('Earthquake magnitude interval (in km)'),
-                                                #slider to filter for magnitudes
-                                                dcc.RangeSlider(min = min_magnitude, max = max_magnitude,
-                                                                id='magnitude-slider',
-                                                                marks={i: '{:.2f}'.format(i) for i in magnitude_space},
-                                                                value=[min_magnitude, max_magnitude],
-                                                                dots=False,
-                                                                step=0.01,
-                                                                updatemode='drag',
-                                                                tooltip={"placement": "bottom", "always_visible": False}
-                                                                ),
-                                                ])]),
-                                             html.Div(
-                                                  style={'display': 'block','text-align': 'center','marginBottom': 10},
-                                                 children = [                                                      
-                                                             dbc.Button('Apply Filters', id='filter-apply-btn', n_clicks=0, color = 'primary'),
-                                                             dbc.Button('Reset Filters', id='filter-reset-btn', n_clicks=0, color = 'secondary')
-                                                             ]
-                                             )
-                                         ]),
-                        dbc.Row( id = 'map-row',
+app.layout = html.Div([
+                        dbc.Row( id = 'filter-map-row',
                                 children =  [                          
                                 dbc.Modal( 
                                             [
@@ -208,63 +148,149 @@ app.layout = html.Div([dbc.Row( id = 'filter-row', children = [#Filters|
                                             is_open = False,
                                             centered=True
                                         ),
+                                                                
                                 html.Div( 
-                                        style={'width':'98%','display':'inline-block',"border":"2px black solid"},                                                                                
-                                        children = [html.H6(['Select an event either on the left map (Overview map) or on the right map (Detail map) to show the spectrogram and waveform image and the sonfified audible waveform',
-                                                            html.Br(),
-                                                            'Select a station (antenna symbol) on the Overview map in order to show the corresponding events on the Detail map.']),
-                                                    dl.Map(children=[
-                                                    dl.TileLayer(),
-                                                    dl.GeoJSON(data = data_points_geojson,
-                                                    options=dict(pointToLayer=point_to_layer),  # how to draw points            
-                                                    hideout=dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=10),
-                                                    min=min_magnitude, max=max_magnitude, colorscale=colorscale),                                                    
-                                                    cluster=True , zoomToBoundsOnClick=True,
-                                                    superClusterOptions={"radius": 100},
-                                                    
-                                                    id ='earthquake_events_geojson'),
-                                                    dl.GeoJSON(data=stations_geojson
-                                                                , options=dict(pointToLayer=draw_antenna), zoomToBounds=True,
-                                                                clusterToLayer=draw_antenna,
-                                                                cluster=True ,  # how to draw clusters
-                                                                zoomToBoundsOnClick=True,
-                                                                superClusterOptions=dict(radius=150),
-                                                                id= 'stations_geojson')  # when true, zooms to bounds of feature (e.g. cluster) on click)
-                                                    ,colorbar                                                                
-                                                ],
-                                                 style={'width': '65%', 'height': '50vh', "display": "inline-block","border-right":"5px black solid"}, id="map"),
-                                                 dl.Map(children=[
-                                                    dl.TileLayer(),
-                                                    dl.GeoJSON(
+                                        style={'width':'100%'},     
+                                        children = [html.Div(children = [html.Div(id = 'filter-show-div',style={'display':'inline-block','vertical-align':'top'},
+                                                  children = [html.Div(children =  [dbc.Button(
+                                                    "Show Filters",
+                                                    id="filter-show-hide-button",
+                                                    #className="mb-3",
+                                                    color="primary",
+                                                    n_clicks=0,
+                                                    )],style={'display':'block','overflow': 'visible','vertical-align':'top'}                                                    
+                                                    ),
+                                                    dbc.Collapse(id = 'collapse-filter-view',is_open = False,children = [
+                                                    html.Div(id = 'filter-div',
+                                                    style={'display':'block','vertical-align': 'top'},
+                                                    children = [
+                                                        html.Div(style={ 'display': 'block','vertical-align':'top','text-align': 'center','width':'100%'},
+                                                                children = [
+                                                                    html.H6('Date interval'),
+                                                                #Datepicker to filter for intervals
+                                                                    dcc.DatePickerRange(
+                                                                        id='date-filter',
+                                                                        min_date_allowed=min_date,
+                                                                        max_date_allowed=max_date,
+                                                                        initial_visible_month=min_date,
+                                                                        start_date=min_date,
+                                                                        end_date=max_date,
+                                                                        style={'zIndex': 10}
+                                                                    )]),
+                                                        html.Div(style={ 'display': 'block','vertical-align':'top','width':'100%'},
+                                                                children = [
+                                                                    html.H6('Providers',style = {'text-align': 'center'}),                                                     
+                                                                #Datepicker to filter for intervals
+                                                                    dcc.Dropdown(id='provider-selector', 
+                                                                        options=[{'label': i, 'value': i} for i in provider_list],
+                                                                        multi=True, 
+                                                                        value = provider_list,
+                                                                        style={},
+                                                                        className='stockselector',
+                                                                        clearable=False,
+                                                                        placeholder = 'Select providers..',
+                                                                        
+                                                                        )]), 
+                                                        
+                                                        html.Div(
+                                                            style={ 'display': 'block','vertical-align':'top','text-align': 'center','width':'100%'},                                                
+                                                            children = [
+                                                            html.H6('Earthquake depth interval (in km)'),
+                                                            #slider to filter for depth
+                                                            dcc.RangeSlider(min = min_depth, max = max_depth,
+                                                                            id='depth-slider',
+                                                                            marks={i: '{:.2f}'.format(i) for i in depth_space},
+                                                                            value=[min_depth, max_depth],
+                                                                            dots=False,
+                                                                            #step=
+                                                                            step=0.01,
+                                                                            updatemode='drag',
+                                                                            tooltip={"placement": "bottom", "always_visible": False}
+                                                        )]),
+                                                        html.Div(
+                                                            style={ 'display': 'block','vertical-align':'top','text-align': 'center','width':'100%'},
+                                                            children = [
+                                                            html.H6('Earthquake magnitude interval'),
+                                                            #slider to filter for magnitudes
+                                                            dcc.RangeSlider(min = min_magnitude, max = max_magnitude,
+                                                                            id='magnitude-slider',
+                                                                            marks={i: '{:.2f}'.format(i) for i in magnitude_space},
+                                                                            value=[min_magnitude, max_magnitude],
+                                                                            dots=False,
+                                                                            step=0.01,
+                                                                            updatemode='drag',
+                                                                            tooltip={"placement": "bottom", "always_visible": False}
+                                                                            ),
+                                                            ]),
+                                                        html.Div(
+                                                            style={'display': 'block','text-align': 'center','marginBottom': 10},
+                                                            children = [                                                      
+                                                                        dbc.Button('Apply Filters', id='filter-apply-btn', n_clicks=0, color = 'primary'),
+                                                                        dbc.Button('Reset Filters', id='filter-reset-btn', n_clicks=0, color = 'secondary')
+                                                                        ]
+                                                        )])
+                                                ])]),
+                                                                                                                               
+                                            html.Div(
+                                                    id = 'all-map-div' ,
+                                                    style={'display':'inline-block',"border":"2px black solid",'width':'93%'},                                                                                
+                                                    children = [html.H6(['Select an event either on the left map (Overview map) or on the right map (Detail map) to show the spectrogram and waveform image and the sonfified audible waveform',
+                                                                        html.Br(),
+                                                                        'Select a station (antenna symbol) on the Overview map in order to show the corresponding events on the Detail map.']),
+                                                                dl.Map(children=[
+                                                                dl.TileLayer(),
+                                                                dl.GeoJSON(data = data_points_geojson,
                                                                 options=dict(pointToLayer=point_to_layer),  # how to draw points            
-                                                                hideout=dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=15),
-                                                                min=min_magnitude, max=max_magnitude, colorscale=colorscale), 
-                                                                zoomToBoundsOnClick=True,
-                                                                zoomToBounds=True,                                              
-                                                                id ='detail_map_earthquake_geojson'),
-                                                    dl.GeoJSON( options=dict(pointToLayer=draw_antenna_on_detail_map),                                                                
-                                                                  # how to draw clusters
-                                                                zoomToBoundsOnClick=True,        
-                                                                id= 'detail_map_stations_geojson'),                                                    
-                                                    detail_colorbar
-                                                 ]
-                                                 ,
-                                                 style={'width': '35%', 'height': '50vh', "display": "inline-block"}, id="detail_map",maxZoom = 20)
-                                                 ]
+                                                                hideout=dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=10),
+                                                                min=min_magnitude, max=max_magnitude, colorscale=colorscale),                                                    
+                                                                cluster=True , zoomToBoundsOnClick=True,
+                                                                superClusterOptions={"radius": 100},
+                                                                
+                                                                id ='earthquake_events_geojson'),
+                                                                dl.GeoJSON(data=stations_geojson
+                                                                            , options=dict(pointToLayer=draw_antenna), zoomToBounds=True,
+                                                                            clusterToLayer=draw_antenna,
+                                                                            cluster=True ,  # how to draw clusters
+                                                                            zoomToBoundsOnClick=True,
+                                                                            superClusterOptions=dict(radius=150),
+                                                                            id= 'stations_geojson')  # when true, zooms to bounds of feature (e.g. cluster) on click)
+                                                                #,colorbar                                                                
+                                                                ,colorbar_div
+                                                            ],
+                                                            style={'width': '65%', 'height': '50vh', "display": "inline-block","border-right":"5px black solid"}, id="map"),
+                                                            dl.Map(children=[
+                                                                dl.TileLayer(),
+                                                                dl.GeoJSON(
+                                                                            options=dict(pointToLayer=point_to_layer),  # how to draw points            
+                                                                            hideout=dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=15),
+                                                                            min=min_magnitude, max=max_magnitude, colorscale=colorscale), 
+                                                                            zoomToBoundsOnClick=True,
+                                                                            zoomToBounds=True,                                              
+                                                                            id ='detail_map_earthquake_geojson'),
+                                                                dl.GeoJSON( options=dict(pointToLayer=draw_antenna_on_detail_map),                                                                
+                                                                            # how to draw clusters
+                                                                            zoomToBoundsOnClick=True,        
+                                                                            id= 'detail_map_stations_geojson')                                          
+                                                                #,detail_colorbar
+                                                                ,detail_colorbar_div
+                                                            ]
+                                                            ,
+                                                            style={'width': '35%', 'height': '50vh', "display": "inline-block"}, id="detail_map",maxZoom = 20)
+                                                            ]
 
-                                ),
-                            html.Div(
-                                style={'display': 'block','marginBottom': 2,'marginTop': 5},
-                                children = [html.H6('Select  whether to show a single event, or compare view (up to 6 events at once)'),
-                                            dcc.RadioItems(options=[{
-                                                                    'value':'simple','label': 'Simple-event view'},
-                                                                    {'value':'multi', 'label': 'Event-Compare view'                                                            
-                                                                    }],
-                                                                    value='simple', id ='view-selector-radio',labelStyle={'display': 'inline-block',
-                                                                                                                            'margin-left': '7px'}
-                                            )
-                                            
-                                ])
+                                            ),
+                                        html.Div(
+                                            style={'display': 'block','marginBottom': 2,'marginTop': 5},
+                                            children = [html.H6('Select  whether to show a single event, or compare view (up to 6 events at once)'),
+                                                        dcc.RadioItems(options=[{
+                                                                                'value':'simple','label': 'Simple-event view'},
+                                                                                {'value':'multi', 'label': 'Event-Compare view'                                                            
+                                                                                }],
+                                                                                value='simple', id ='view-selector-radio',labelStyle={'display': 'inline-block',
+                                                                                                                                        'margin-left': '7px'}
+                                                        )
+                                                        
+                                            ])])])
                             ]),
                         dbc.Row(id = 'simple-view-row',style = {'display': 'inline-block'},children=html.Div([
                     #Audio player
@@ -494,7 +520,9 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,div_clo
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'center'}, 
                                                     children = [html.Div(html.Audio(src = audio_src, controls=True),style={'display': 'inline-block', 'float': 'left'}),
-                                                               html.Div(html.Button(children = 'Remove',id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),
+                                                                html.Div(html.Button(children = 'Remove',id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),
+                                                               #html.Div(html.Button(children = html.Span(["Button", html.I(className="fa fa-close")]),id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),
+                                                               #html.Div(html.I(className="fa fa-close",id = {'type': 'close-div','parent': selected_trace_name}),style={'display': 'inline-block', 'float': 'right'})]),
 
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'left','margin':'0'}, 
@@ -650,6 +678,28 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
 
         else:
             return dash.no_update
+
+
+@app.callback(                                                                                                            
+Output("collapse-filter-view", "is_open"),
+Output("filter-show-hide-button", "children"),
+Output('all-map-div', 'style'),
+Output('filter-show-div','style'),
+[Input("filter-show-hide-button", "n_clicks")],
+[State("collapse-filter-view", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    style = {'display':'inline-block',"border":"2px black solid",'width':'93%'}  
+    filter_div_style = {'display':'inline-block','vertical-align':'top','width':'30%'}  
+    if n:
+        btn_text = 'Hide Filters'        
+        style = {'display':'inline-block',"border":"2px black solid",'width':'65%'}
+        if is_open:
+            btn_text = 'Show Filters'
+            filter_div_style = {'display':'inline-block','vertical-align':'top'}
+            style = {'display':'inline-block',"border":"2px black solid",'width':'93%'}  
+        return [not is_open,btn_text,style,filter_div_style]
+    return [is_open,'Hide Filters',style,filter_div_style]
 
 
 if __name__ == '__main__':
