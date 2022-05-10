@@ -30,6 +30,8 @@ from dash_extensions.javascript import assign
 from datetime import datetime, timedelta
 
 geolocator = Nominatim(user_agent="geoapiExercises")
+pd.options.mode.chained_assignment = None
+
 def normalize_amplitude(waveform, rms_level):
     """
     Normalize the signal given a certain technique (rms).
@@ -242,20 +244,24 @@ def create_station_statistics_plot(station_name,df_station_events, close_all=Tru
     #Plot the statistics
     px = 1/plt.rcParams['figure.dpi']
     #fig = plt.figure(figsize=(500*px, 200*px))
-    fig, ax1 = plt.subplots(figsize=(500*px, 400*px))
+    fig, ax1 = plt.subplots(figsize=(500*px, 700*px))
     ax1.bar(statistics['year'], statistics['count'])
     ax2 = ax1.twinx()
     p1, = ax2.plot(statistics['year'], statistics['min'],color = 'r', label = "min magnitude")
     #ax3 = ax2.twinx()
-    p2, = ax2.plot(statistics['year'], statistics['max'],color = 'g', label = "max magnitude")
+    p2, = ax2.plot(statistics['year'], statistics['max'],color = 'black', label = "max magnitude")
     #ax4 = ax3.twinx()
     p3, = ax2.plot(statistics['year'], statistics['mean'],color = 'orange', label = "avg magnitude")
 
-    plt.title(f'Statistics of station {station_name}')
-    plt.legend(handles=[p1, p2, p3],  bbox_to_anchor=(1.07, 1), loc='upper left')
-    plt.xlabel('Year')
-    ax1.set_ylabel('Number of occurence')
-    ax2.set_ylabel('Magnitude')
+    plt.title(f'Statistics of station {station_name}', loc = 'left')
+    plt.legend(handles=[p1, p2, p3], loc='upper left', bbox_to_anchor=(0.69, 1.1), fancybox=True, shadow=True)
+    #plt.legend(handles=[p1, p2, p3],  loc='upper right')
+    #plt.legend(handles=[p1, p2, p3], loc='upper center', bbox_to_anchor=(0.5, 1.15),ncol=3, fancybox=True, shadow=True)
+    ax1.set_xlabel('Year',fontsize = 14)
+    ax1.set_xticks(ax1.get_xticks())
+    ax1.set_xticklabels(sorted(set(statistics['year'])),rotation = 45)
+    ax1.set_ylabel('Number of occurence',fontsize = 14)
+    ax2.set_ylabel('Magnitude',fontsize = 14)
     
     out_img = BytesIO()
    

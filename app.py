@@ -69,8 +69,6 @@ data_points_geojson = dataframe_to_geojson(df_events)
 
 
 
-
-
 colorscale = ['red', 'yellow', 'green', 'blue', 'purple']  # rainbow
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"  # js lib used for colors
 color_prop = 'source_magnitude'
@@ -278,8 +276,14 @@ app.layout = html.Div([
                                                             style={'width': '35%', 'height': '50vh', "display": "inline-block"}, id="detail_map",maxZoom = 20)
                                                             ]
 
-                                            ),
-                                        html.Div(
+                                            )
+                                        ])])
+                            ]),
+                        dbc.Row([
+                            #dbc.Col(id = 'simple-view-col',style = {'display': 'inline-block'}, width = 8,lg = 8,children=html.Div([
+                           #dbc.Col(width = 8,lg = 8,children=[
+                           dbc.Col(width = True,children=[
+                               html.Div(
                                             style={'display': 'block','marginBottom': 2,'marginTop': 5},
                                             children = [html.H6('Select  whether to show a single event, or compare view (up to 6 events at once)'),
                                                         dcc.RadioItems(options=[{
@@ -288,14 +292,13 @@ app.layout = html.Div([
                                                                                 }],
                                                                                 value='simple', id ='view-selector-radio',labelStyle={'display': 'inline-block',
                                                                                                                                         'margin-left': '7px'}
-                                                        )
-                                                        
-                                            ])])])
-                            ]),
-                        dbc.Row(id = 'simple-view-row',style = {'display': 'inline-block'},children=html.Div([
-                    #Audio player
+                                                        )                                                        
+                                            ])
+                               ,
+                               html.Div(id = 'simple-view-col', children =[
+                                #Audio player
                                 html.Div(                                    
-                                        style={'marginBottom': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'top','width':'600px'},                          
+                                        style={'marginBottom': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'top','width':'500px'},                          
                                     children = [
                                                 
                                                 html.Audio(html.Source(src=o_file,type='audio/wav'), controls=True, id = 'audio_player_main'),                                          
@@ -304,27 +307,31 @@ app.layout = html.Div([
                                                     ,data = create_event_infos(df_events,'KAN08.GS_20150408005359_EV')
                                                     ,style_cell_conditional=[
                                                         {'if': {'column_id': 'index'},
-                                                        'width': '20%'},
+                                                        'width': '10%'},
                                                         {'if': {'column_id': '0'},
-                                                        'width': '80%'},
+                                                        'width': '70%'},
                                                     ]
                                                     ,columns=[{"name": i, "id": i} for i in ['index','0']])
                                 #)
-                                ]),                         
-                                html.Div(style={'marginBottom': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'top'},                         
-                                        children = [
-                                                    html.Div(style={ 'display': 'block','vertical-align':'middle'}, id = 'seismogram-div',
-                                                    children = [html.Img(id ='seismogram_img'
-                                                    , src = new_wave_spectrogram, style= {'width': '100%'}
-                                                    )])
-                                                    ])])
+                                    ]),                         
+                                    html.Div(style={'marginBottom': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'top'},                         
+                                            children = [
+                                                        html.Div(style={ 'display': 'block','vertical-align':'middle'}, id = 'seismogram-div',
+                                                        children = [html.Img(id ='seismogram_img'
+                                                        , src = new_wave_spectrogram, style= {'width': '100%'}
+                                                        )])
+                                                        ])]
                                 ),
-                        dbc.Row(id = 'multi-view-row',style = { 'display': 'none'},
+                            html.Div(id = 'multi-view-col',style = { 'display': 'none'},
                                 children = [html.Div(id = 'clear-compare-view-div',children = html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
-                                )])
+                                )]),
+                        dbc.Col(id = 'station-stats-col',style = { 'display': 'none','text-align': 'center','vertical-align': 'top','margin':'0'}, width = 'auto',
+                                children = [html.Div(id = 'station-stats-div',style = {'text-align':'center','vertical-align': 'top','margin':'0'},children = html.Img(id ='station-stats-img'
+                                                    , src = None, style= {'width': '100%'}))]
+                                )])])
 
 
-
+#Method for filter components: apply filter will be used for the corresponding maps, reset filter will relaoad the default events and stations
 @app.callback(
     Output(component_id='depth-slider', component_property= 'value'),
     Output(component_id='magnitude-slider', component_property= 'value'),
@@ -335,8 +342,9 @@ app.layout = html.Div([
     Output(component_id='map', component_property= 'style'),
     Output(component_id='provider-selector', component_property= 'value'),
     
-    Input(component_id='filter-apply-btn', component_property='n_clicks'), #Input button triggers the callback
-    Input(component_id='filter-reset-btn', component_property='n_clicks'), #Input button triggers the callback
+    Input(component_id='filter-apply-btn', component_property='n_clicks'), 
+    Input(component_id='filter-reset-btn', component_property='n_clicks'),
+
     State(component_id='depth-slider', component_property= 'value'),
     State(component_id='magnitude-slider', component_property= 'value'),
     State(component_id='date-filter', component_property= 'start_date'),
@@ -374,10 +382,10 @@ def apply_filter(apply_click,reset_click, depth_value, magnitude_value,start_dat
     else:
         return dash.no_update
 
-
+#Switching view within the simple event and comparison representation
 @app.callback(
-    Output(component_id='simple-view-row', component_property= 'style'),
-    Output(component_id='multi-view-row', component_property= 'style'),
+    Output(component_id='simple-view-col', component_property= 'style'),
+    Output(component_id='multi-view-col', component_property= 'style'),
     Input(component_id='view-selector-radio', component_property= 'value')
 )
 
@@ -395,12 +403,12 @@ def switch_view(button_value):
     return [simple_view_div_style,multi_view_div_style]
         
 
+#Select event on the overview or detatl map: will trigger the extraction of waveforms and construct the spectrogram and amplitude normalize audioble signals.
 @app.callback(Output("event_info_table", "data"),
             Output('seismogram_img', 'src'),
-            #Output('spectrogram_img', 'src'), 
             Output('audio_player_main', 'src'),
             Output('audio_player_main', 'style'),
-            Output('multi-view-row', 'children'),            
+            Output('multi-view-col', 'children'),            
             Output(component_id="event-no-match-alert", component_property= 'children'),
             Output(component_id="event-no-match-modal", component_property= 'is_open'),    
             Output(component_id="compare-view-limit-exceed-modal", component_property= 'is_open'),   
@@ -409,22 +417,17 @@ def switch_view(button_value):
             Input("earthquake_events_geojson", "click_feature"),
             Input("detail_map_earthquake_geojson", "click_feature"),
             Input('clear-compare-view', 'n_clicks'),
-            #Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'),
-            #Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'),
-            Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'),
+            Input({'type': 'close-div', 'parent': ALL}, 'n_clicks'), #pattern matching callback: any element woth the specified type could trigger the callback
             
             State("event_info_table", "data"),
             State('seismogram_img', 'src'),
-            #State('spectrogram_img', 'src'),
             State('audio_player_main', 'src'),
             State('audio_player_main', 'style'),
 
             State(component_id='view-selector-radio', component_property= 'value'),
-            State('multi-view-row', 'children'),
+            State('multi-view-col', 'children'),
             State(component_id="event-no-match-alert", component_property= 'children')
-            #State(component_id="event-no-match-alert", component_property= 'children')
 
-            #State({'type': 'close-div', 'parent': ALL}, 'id')
 )
 
 def select_event(clicked_event,clicked_detail_event,click_compare_button,div_close_button,current_event_table ,current_seismogram_image,current_audio_src,audio_div_element,current_view, div_multi_row_elements, current_alert_msg):
@@ -499,30 +502,25 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,div_clo
             alert_state = True
 
             seismic_plot = current_seismogram_image
-            #spectrogram_plot = current_spectrogram_image
             table_data = current_event_table
             audio_src = current_audio_src
             audio_player_style = audio_div_element
-            #print('data cannot be found')
-            #return dash.no_update
+        
         if current_view == 'simple':
-        #return [table_data,seismic_plot,spectrogram_plot,audio_src,audio_player_style,div_simple_row_style,div_multi_row_style,div_multi_row_elements]
+        
             return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
 
         elif current_view == 'multi':
             if len(div_multi_row_elements) < 7:
                  
                 
-                if alert_state is False:
-                #new_div = html.Div(style={'marginLeft': 5,'marginTop': 5, 'marginRight': 5,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left'},
+                if alert_state is False:                
                     new_div = html.Div(id = 'div_' + selected_trace_name,style={'marginBottom': 5, 'marginRight':0,"border":"2px black solid",'display': 'inline-block', 'vertical-align': 'left','width':'500px'},
                                         children = [
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'center'}, 
                                                     children = [html.Div(html.Audio(src = audio_src, controls=True),style={'display': 'inline-block', 'float': 'left'}),
-                                                                html.Div(html.Button(children = 'Remove',id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),
-                                                               #html.Div(html.Button(children = html.Span(["Button", html.I(className="fa fa-close")]),id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),
-                                                               #html.Div(html.I(className="fa fa-close",id = {'type': 'close-div','parent': selected_trace_name}),style={'display': 'inline-block', 'float': 'right'})]),
+                                                                html.Div(html.Button(children = 'Remove',id = {'type': 'close-div','parent': selected_trace_name},style={'display': 'inline-block', 'float': 'right'}))]),                                        
 
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'left','margin':'0'}, 
@@ -531,26 +529,24 @@ def select_event(clicked_event,clicked_detail_event,click_compare_button,div_clo
                                             html.Div(
                                                     style={'display': 'block','vertical-align':'left','width':'450px','margin':'0'},
                                                     children =   dash_table.DataTable(style_header={'display':'none'}
-                                                ,style_cell={"whiteSpace": "pre-line"}                                      
-                                                ,data = table_data
-                                                ,style_cell_conditional=[
-                                                    {'if': {'column_id': 'index'},
-                                                    'width': '20%'},
-                                                    {'if': {'column_id': '0'},
-                                                    'width': '80%'},
-                                                ]
-                                                ,columns=[{"name": i, "id": i} for i in ['index','0']]) 
+                                                                                    ,style_cell={"whiteSpace": "pre-line"}                                      
+                                                                                    ,data = table_data
+                                                                                    ,style_cell_conditional=[
+                                                                                        {'if': {'column_id': 'index'},
+                                                                                        'width': '20%'},
+                                                                                        {'if': {'column_id': '0'},
+                                                                                        'width': '80%'},
+                                                                                    ]
+                                                                                    ,columns=[{"name": i, "id": i} for i in ['index','0']]) 
                                         )])
                                         
                                     
                     div_multi_row_elements.append(new_div)           
 
                 return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
-            #TODO:currently just no update, but some warning dialog will be implemented later
             else:
                 compare_view_exceed_state = True
                 return [table_data,seismic_plot,audio_src,audio_player_style,div_multi_row_elements, current_alert_msg, alert_state,compare_view_exceed_state]
-                #return dash.no_update
 
          
     else:
@@ -569,6 +565,9 @@ Output(component_id='detail_map', component_property= 'style'),
 Output(component_id='detail_map_colorbar', component_property= 'min'),
 Output(component_id='detail_map_colorbar', component_property= 'max'),
 Output(component_id='detail_map_colorbar', component_property= 'style'),
+Output(component_id='station-stats-img', component_property= 'src'),
+Output(component_id='station-stats-col', component_property= 'style'),
+
 Input(component_id="stations_geojson",component_property=  "click_feature"),
 Input(component_id='filter-apply-btn', component_property='n_clicks'), #Input button triggers the callback
 Input(component_id='filter-reset-btn', component_property='n_clicks'), #Input button triggers the callback
@@ -600,6 +599,7 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
 
 
             df_detail_map_filter  = df_events[filter_records]
+            stats_plot = create_station_statistics_plot(selected_station_id,df_detail_map_filter)
             try:                
                 
                 filtered_data_points_min_magnitude = min(df_detail_map_filter['source_magnitude'])                
@@ -623,7 +623,7 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
                                     
 
 
-            return [hideout_update,filtered_datapoints_geojson,filtered_stations_geojson,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict()]
+            return [hideout_update,filtered_datapoints_geojson,filtered_stations_geojson,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict(), stats_plot, {'text-align': 'center'}]
 
 
         else:
@@ -632,7 +632,7 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
             hideout_update = dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=10),
                                             min=filtered_data_points_min_magnitude, max=filtered_data_points_max_magnitude, colorscale=colorscale)
         
-            return [hideout_update,None,None,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict()]
+            return [hideout_update,None,None,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict(), None, { 'display': 'none'}]
             
     elif clicked_element == 'filter-reset-btn':
 
@@ -641,7 +641,7 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
             hideout_update = dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=10),
                                             min=filtered_data_points_min_magnitude, max=filtered_data_points_max_magnitude, colorscale=colorscale)
         
-            return [hideout_update,None,None,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict()]
+            return [hideout_update,None,None,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict(), None, { 'display': 'none'}]
     
     elif clicked_element == 'stations_geojson':        
         
@@ -655,7 +655,9 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
 
             filter_records = df_events['time'].between(pd.to_datetime(start_date),pd.to_datetime(end_date)) & df_events['source_magnitude'].between(magnitude_value[0],magnitude_value[1])\
                             & df_events['source_depth_km'].between(depth_value[0],depth_value[1]) & (df_events['station_id'] == selected_station_id)            
-            df_detail_map_filter = df_events[filter_records]            
+            df_detail_map_filter = df_events[filter_records]  
+            stats_plot = create_station_statistics_plot(selected_station_id,df_detail_map_filter)
+
             try:                                
                 filtered_data_points_min_magnitude = min(df_detail_map_filter['source_magnitude'])                
                 filtered_data_points_max_magnitude = max(df_detail_map_filter['source_magnitude'])
@@ -673,13 +675,16 @@ def show_detail_event(clicked_event, apply_click,reset_click, depth_value, magni
             if len(filtered_datapoints_geojson) == 0:
                 filtered_datapoints_geojson = None
             filtered_stations_geojson = stations_df_to_geojson(station_record)        
+            
 
-            return [hideout_update,filtered_datapoints_geojson,filtered_stations_geojson,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict()]
+            #return [hideout_update,filtered_datapoints_geojson,filtered_stations_geojson,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict(),stats_plot,dict()]
+            return [hideout_update,filtered_datapoints_geojson,filtered_stations_geojson,style_to_refresh,filtered_data_points_min_magnitude,filtered_data_points_max_magnitude,dict(),stats_plot,{'text-align': 'center'}]
 
         else:
             return dash.no_update
 
 
+#Show-hide filters
 @app.callback(                                                                                                            
 Output("collapse-filter-view", "is_open"),
 Output("filter-show-hide-button", "children"),
