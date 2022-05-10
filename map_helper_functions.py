@@ -260,7 +260,7 @@ def create_station_statistics_plot(station_name,df_station_events, close_all=Tru
     ax1.set_xlabel('Year',fontsize = 14)
     ax1.set_xticks(ax1.get_xticks())
     ax1.set_xticklabels(sorted(set(statistics['year'])),rotation = 45)
-    ax1.set_ylabel('Number of occurence',fontsize = 14)
+    ax1.set_ylabel('Number of recorded earthquake events',fontsize = 14)
     ax2.set_ylabel('Magnitude',fontsize = 14)
     
     out_img = BytesIO()
