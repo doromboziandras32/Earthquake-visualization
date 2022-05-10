@@ -233,4 +233,40 @@ def dataframe_to_geojson(x):
     df_points_records_renamed = df_points.rename(columns = {'source_latitude' :'lat','source_longitude' :'lon'}).to_dict('records')
     return dlx.dicts_to_geojson(df_points_records_renamed)
 
+
+def create_station_statistics_plot(station_name,df_station_events, close_all=True, **save_args):
+    #Store the years from the station corresponding earthquake events
+    df_station_events['year'] = df_station_events['time'].dt.year.apply(str)
+    #Extract the number of occurences, min, max, mean magnitudes
+    statistics = df_station_events.groupby(['year'])['source_magnitude'].agg(['min','max','mean','count']).reset_index()
+    #Plot the statistics
+    px = 1/plt.rcParams['figure.dpi']
+    #fig = plt.figure(figsize=(500*px, 200*px))
+    fig, ax1 = plt.subplots(figsize=(500*px, 400*px))
+    ax1.bar(statistics['year'], statistics['count'])
+    ax2 = ax1.twinx()
+    p1, = ax2.plot(statistics['year'], statistics['min'],color = 'r', label = "min magnitude")
+    #ax3 = ax2.twinx()
+    p2, = ax2.plot(statistics['year'], statistics['max'],color = 'g', label = "max magnitude")
+    #ax4 = ax3.twinx()
+    p3, = ax2.plot(statistics['year'], statistics['mean'],color = 'orange', label = "avg magnitude")
+
+    plt.title(f'Statistics of station {station_name}')
+    plt.legend(handles=[p1, p2, p3],  bbox_to_anchor=(1.07, 1), loc='upper left')
+    plt.xlabel('Year')
+    ax1.set_ylabel('Number of occurence')
+    ax2.set_ylabel('Magnitude')
+    
+    out_img = BytesIO()
+   
+    fig.savefig(out_img, format='png', **save_args)
+        
+    fig.clf()            
+    plt.close('all')   
+    
+    out_img.seek(0)  # rewind file
+    encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
+    #return encoded
+    return "data:image/png;base64,{}".format(encoded)
+
     
