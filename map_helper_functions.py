@@ -244,7 +244,7 @@ def create_station_statistics_plot(station_name,df_station_events, close_all=Tru
     #Plot the statistics
     px = 1/plt.rcParams['figure.dpi']
     #fig = plt.figure(figsize=(500*px, 200*px))
-    fig, ax1 = plt.subplots(figsize=(500*px, 700*px))
+    fig, ax1 = plt.subplots(figsize=(500*px, 650*px))
     ax1.bar(statistics['year'], statistics['count'])
     ax2 = ax1.twinx()
     p1, = ax2.plot(statistics['year'], statistics['min'],color = 'r', label = "min magnitude")
