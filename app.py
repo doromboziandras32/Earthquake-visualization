@@ -88,6 +88,26 @@ point_to_layer = assign("""function(feature, latlng, context){
 }""")
 
 
+cluster_to_layer = assign("""function(feature, latlng, index, context){
+    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
+    const csc = chroma.scale(colorscale).domain([min, max]);
+    // Set color based on mean value of leaves.
+    const leaves = index.getLeaves(feature.properties.cluster_id);
+    let valueSum = 0;
+    for (let i = 0; i < leaves.length; ++i) {
+        valueSum += leaves[i].properties[colorProp]
+    }
+    const valueMean = valueSum / leaves.length;
+    // Render a circle with the number of leaves written in the center.
+    const icon = L.divIcon.scatter({
+        html: '<div style="background-color:white;"><span>' + feature.properties.point_count_abbreviated + '</span></div>',
+        className: "marker-cluster",
+        iconSize: L.point(40, 40),
+        color: csc(valueMean)
+    });
+    return L.marker(latlng, {icon : icon})
+}""")
+
 #icons/antenna_img.png
 # 
 # `https://github.com/doromboziandras32/Interdisciplinary/blob/master/icons/antenna_img.png`
@@ -238,11 +258,12 @@ app.layout = html.Div([
                                                                 dl.Map(children=[
                                                                 dl.TileLayer(),
                                                                 dl.GeoJSON(data = data_points_geojson,
-                                                                options=dict(pointToLayer=point_to_layer),  # how to draw points            
-                                                                hideout=dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=10),
-                                                                min=min_magnitude, max=max_magnitude, colorscale=colorscale),                                                    
-                                                                cluster=True , zoomToBoundsOnClick=True,
-                                                                superClusterOptions={"radius": 100},
+                                                                            options=dict(pointToLayer=point_to_layer),  # how to draw points            
+                                                                            hideout=dict(colorProp=color_prop, circleOptions=dict(fillOpacity=1, stroke=False, radius=10),
+                                                                            min=min_magnitude, max=max_magnitude, colorscale=colorscale),                                                    
+                                                                            cluster=True , zoomToBoundsOnClick=True,
+                                                                            clusterToLayer=cluster_to_layer,
+                                                                            superClusterOptions={"radius": 100},
                                                                 
                                                                 id ='earthquake_events_geojson'),
                                                                 dl.GeoJSON(data=stations_geojson
@@ -325,8 +346,8 @@ app.layout = html.Div([
                             html.Div(id = 'multi-view-col',style = { 'display': 'none'},
                                 children = [html.Div(id = 'clear-compare-view-div',children = html.Button('Clear selection', id='clear-compare-view', n_clicks=0),style={'vertical-align': 'top'})]
                                 )]),
-                        dbc.Col(id = 'station-stats-col',style = { 'display': 'none','text-align': 'center','vertical-align': 'top','margin':'0'}, width = 'auto',
-                                children = [html.Div(id = 'station-stats-div',style = {'text-align':'center','vertical-align': 'top','margin':'0'},children = html.Img(id ='station-stats-img'
+                        dbc.Col(id = 'station-stats-col',style = { 'display': 'none','vertical-align': 'top','margin':'0'}, width = 'auto',
+                                children = [html.Div(id = 'station-stats-div',style = {'vertical-align': 'top','margin':'0'},children = html.Img(id ='station-stats-img'
                                                     , src = None, style= {'width': '100%'}))]
                                 )])])
 
@@ -709,4 +730,4 @@ def toggle_collapse(n, is_open):
 
 if __name__ == '__main__':
     #app.run_server()
-    app.run_server(debug=True, use_reloader=False)
+    app.run_server( use_reloader=False)
