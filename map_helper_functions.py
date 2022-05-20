@@ -245,13 +245,13 @@ def create_station_statistics_plot(station_name,df_station_events, close_all=Tru
     px = 1/plt.rcParams['figure.dpi']
     #fig = plt.figure(figsize=(500*px, 200*px))
     fig, ax1 = plt.subplots(figsize=(500*px, 650*px))
-    ax1.bar(statistics['year'], statistics['count'])
+    ax1.bar(statistics['year'], statistics['count'], color = 'blue')
     ax2 = ax1.twinx()
     p1, = ax2.plot(statistics['year'], statistics['min'],color = 'r', label = "min magnitude")
     #ax3 = ax2.twinx()
-    p2, = ax2.plot(statistics['year'], statistics['max'],color = 'black', label = "max magnitude")
+    p2, = ax2.plot(statistics['year'], statistics['max'],color = 'orange', label = "max magnitude")
     #ax4 = ax3.twinx()
-    p3, = ax2.plot(statistics['year'], statistics['mean'],color = 'orange', label = "avg magnitude")
+    p3, = ax2.plot(statistics['year'], statistics['mean'],color = 'black', label = "avg magnitude")
 
     plt.title(f'Statistics of station {station_name}', loc = 'left')
     plt.legend(handles=[p1, p2, p3], loc='upper left', bbox_to_anchor=(0.69, 1.1), fancybox=True, shadow=True)
@@ -260,7 +260,7 @@ def create_station_statistics_plot(station_name,df_station_events, close_all=Tru
     ax1.set_xlabel('Year',fontsize = 14)
     ax1.set_xticks(ax1.get_xticks())
     ax1.set_xticklabels(sorted(set(statistics['year'])),rotation = 45)
-    ax1.set_ylabel('Number of recorded earthquake events',fontsize = 14)
+    ax1.set_ylabel('Number of recorded earthquake events',fontsize = 14, color = 'blue')
     ax2.set_ylabel('Magnitude',fontsize = 14)
     
     out_img = BytesIO()
