@@ -108,6 +108,9 @@ cluster_to_layer = assign("""function(feature, latlng, index, context){
     return L.marker(latlng, {icon : icon})
 }""")
 
+
+
+
 #icons/antenna_img.png
 # 
 # `https://github.com/doromboziandras32/Interdisciplinary/blob/master/icons/antenna_img.png`
@@ -115,6 +118,13 @@ draw_antenna = assign("""function(feature, latlng){
 const antenna = L.icon({iconUrl: `/static/antenna_img.png`, iconSize: [24,24]});
 return L.marker(latlng, {icon: antenna});
 }""")
+
+draw_antenna_cluster = assign("""function(feature, latlng){
+const antenna = L.icon({iconUrl: `/static/multiple_antenna.png`, iconSize: [35,35]});
+return L.marker(latlng, {icon: antenna});
+}""")
+
+
 
 
 draw_antenna_on_detail_map = assign("""function(feature, latlng){
@@ -268,7 +278,7 @@ app.layout = html.Div([
                                                                 id ='earthquake_events_geojson'),
                                                                 dl.GeoJSON(data=stations_geojson
                                                                             , options=dict(pointToLayer=draw_antenna), zoomToBounds=True,
-                                                                            clusterToLayer=draw_antenna,
+                                                                            clusterToLayer=draw_antenna_cluster,
                                                                             cluster=True ,  # how to draw clusters
                                                                             zoomToBoundsOnClick=True,
                                                                             superClusterOptions=dict(radius=150),
@@ -730,4 +740,5 @@ def toggle_collapse(n, is_open):
 
 if __name__ == '__main__':
     #app.run_server()
+    #app.run_server(debug=True, use_reloader=False)
     app.run_server( use_reloader=False)
