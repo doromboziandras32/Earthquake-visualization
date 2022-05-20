@@ -31,6 +31,8 @@ Based on the record(s) stored in the metadata file, the waveform can be queried 
 <h3> Visualization of events </h3>
 
 The earthquake events are shown in maps. The maps are provided via the **[Dash Leaflet](https://github.com/thedirtyfew/dash-leaflet)** framework, the points are plotted as geojson instances as colored circle-markers, which color-coding belongs to the magnitude value of the recorded events. Additionally, the recording stations are also plotted with antenna symbol.
+The  paired orange color antennas (<a href="https://www.flaticon.com/free-icons/telecommunication" title="telecommunication icons">Telecommunication icons created by catkuro - Flaticon</a>) represent antenna clusters.
+
 
 ![Earthquake map](/screenshots/map_detail_00_edited.png "Overview and detail maps").
 
