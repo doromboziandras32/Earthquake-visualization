@@ -22,7 +22,6 @@ OR
 
 
 
-TODO: insert screenshots of the whole dasahboard there
 <h2>Components </h2>
 
 The goal of the Dashboard is to visualize and sonify earthquake events from the past:
